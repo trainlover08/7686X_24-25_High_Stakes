@@ -419,11 +419,21 @@ void blue_left_elims(lemlib::Chassis& chassis) {
     mogo_mech.retract();*/
 }
 
+void skills(lemlib::Chassis chassis) {
+    chassis.setPose(-55, -7, 270);
+        arm_mech.extend();
+    chassis.turnToHeading(90, 1000, {.minSpeed=1, .earlyExitRange=0.1});
+    chassis.moveToPose(-46.5, -12, 180, 2000, {.minSpeed=1, .earlyExitRange=0.25});
+    chassis.moveToPose(-51, -50, 225, 2000, {.minSpeed=1, .earlyExitRange=0.5});
+    chassis.moveToPose(-46.5, 12, 0, 2000, {.minSpeed=1, .earlyExitRange=0.5});
+    chassis.moveToPose(-51, 50, 315, 5000, {.minSpeed=1, .earlyExitRange=0.5});
+}
+
 void autonomous() {
     // Switch the brain to displaying current motor temperature status in preperation for the match
     gui.current_view = 1;
 
-    blue_left_elims(chassis);
+    skills(chassis);
 
     // determines which autons run based on the one selected on the previous screen
     /*switch (gui.selected_auton) {
@@ -473,8 +483,8 @@ void opcontrol() {
     gui.motor_list.push_back(intake_lower);
     gui.motor_list.push_back(intake_upper);
 
-    master = get_active_controller(chase, miles)[0];
-    slave = get_active_controller(chase, miles)[1];
+    master = get_active_controller(chase, miles)[1];
+    slave = get_active_controller(chase, miles)[0];
 
     controller_print.cont_drivetrain.push_back(lm1);
     controller_print.cont_drivetrain.push_back(lm2);

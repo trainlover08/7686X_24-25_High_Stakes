@@ -17,7 +17,7 @@ vector<vector<double>> generate_data(int num_samples) {
 
     for (int i = 0; i < num_samples; ++i) {
         data[i][0] = dis(gen);
-        data[i][1] = 3.0 * data[i][0] + 5.0 + dis(gen) * 0.5; // y = 3x + 5 + noise
+        data[i][1] = 3.0 * data[i][0] + 5.0; // y = 3x + 5 + noise
     }
     return data;
 }
@@ -47,46 +47,40 @@ double mean_squared_error(const vector<vector<double>>& predicted, const vector<
 }
 
 void linear_regression_test() {
-    AdamWOptimizer optimizer(0.025, 0.9, 0.999, 0.01, 1e-4);
+    AdamWOptimizer optimizer(0.05, 0.9, 0.999, 0.001, 1e-4);
     NeuralNetwork nn;
-    nn.add_layer(Layer(1, 32, "relu", optimizer));
-    nn.add_layer(Layer(32, 16, "relu", optimizer));
-    nn.add_layer(Layer(16, 8, "relu", optimizer));
-    nn.add_layer(Layer(8, 1, "linear", optimizer));
+    nn.add_layer(Layer(1, 1, "linear", optimizer));
 
     // Generate data
     vector<vector<double>> data = generate_data(100);
     vector<vector<double>> inputs = extract_inputs(data);
     vector<vector<double>> targets = extract_outputs(data);
 
-    double CLIP_THRESHOLD = 0.05;
+    double CLIP_THRESHOLD = 1.05;
 
     // Training
-    for (int epoch = 0; epoch < 2500; ++epoch) {
+    for (int epoch = 0; epoch <= 70; ++epoch) {
         auto predictions = nn.forward(inputs);
         vector<vector<double>> errors(predictions.size(), vector<double>(1));
         for (size_t i = 0; i < predictions.size(); ++i) {
-            errors[i][0] = predictions[i][0] - targets[i][0];
+            errors[i][0] = -predictions[i][0] + targets[i][0];
         }
         nn.backward(errors, CLIP_THRESHOLD);
         nn.update_weights();
 
-        if (epoch % 100 == 0) {
+        if (epoch % 10 == 0) {
             double mse = mean_squared_error(predictions, targets);
             std::cout << "Epoch " << epoch << ", MSE: " << mse << endl;
+
+            auto final_predictions = nn.forward(inputs);
+
+            vector<vector<double>> final_input = {{4}};
+
+            vector<vector<double>> intermediate_output = nn.forward(final_input);
+
+            cout << "(4 * 3) + 5 = " << intermediate_output[0][0] << endl;
         }
     }
-
-    // Final evaluation
-    auto final_predictions = nn.forward(inputs);
-    double final_mse = mean_squared_error(final_predictions, targets);
-    std::cout << "Final MSE: " << final_mse << endl;
-
-    vector<vector<double>> final_input = {{4}};
-
-    vector<vector<double>> intermediate_output = nn.forward(final_input);
-
-    cout << "(4 * 3) + 5 = " << intermediate_output[0][0] << endl;
 }
 
 int main() {

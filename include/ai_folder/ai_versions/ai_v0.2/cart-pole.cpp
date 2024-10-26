@@ -28,7 +28,7 @@ void trainCartPolePolicyGradient(NeuralNetwork& actor, NeuralNetwork& critic, Li
 
     actor.add_layer(Layer(2, 128, "relu", actorOptimizer));
     actor.add_layer(Layer(128, 128, "relu", actorOptimizer));
-    actor.add_layer(Layer(128, 1, "softmax", actorOptimizer));  // Output probabilities for actions
+    actor.add_layer(Layer(128, 1, "linear", actorOptimizer));  // Output probabilities for actions
 
     critic.add_layer(Layer(2, 64, "relu", criticOptimizer));
     critic.add_layer(Layer(64, 64, "relu", criticOptimizer));
@@ -126,7 +126,7 @@ int main() {
     NeuralNetwork actor;
     NeuralNetwork critic;
 
-    trainCartPolePolicyGradient(actor, critic, env, 1000, 0.99, 0.001, 0.1, 1e-4);
+    trainCartPolePolicyGradient(actor, critic, env, 1000, 0.99, 0.01, 0.1, 1e-4);
 
     return 0;
 }
