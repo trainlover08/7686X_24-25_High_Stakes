@@ -47,7 +47,7 @@ namespace mcl {
         }
     };
 
-    class ParticleFilter {
+    /* class ParticleFilter {
         ParticleFilter(Robot* robot, std::bitset<(14400*14400)>& bitmap, unsigned int points) : robot(robot), bitmap(bitmap), points(points) {
             Particle default_particle(7200, 7200, 0.0f, robot);
             std::vector<Particle> ps(points, default_particle);
@@ -188,5 +188,6 @@ namespace mcl {
 
             p.update(x, y, theta);
         }
-    };
+    };*/
+    // need completely new filter class
 };
