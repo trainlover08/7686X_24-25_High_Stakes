@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include "pros/optical.hpp"
 #include "pros/colors.hpp"
@@ -11,3 +11,4 @@ class Color_Sort {
 
     pros::Color last_color;
 };
+*/
