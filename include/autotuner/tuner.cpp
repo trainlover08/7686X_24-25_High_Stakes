@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include "../pros/rtos.hpp"
 #include "../pros/motors.hpp"
+#include "../lemlib/pid.hpp"
+#include "../lemlib/chassis/chassis.hpp"
 
 struct GradientDescent
 {
@@ -139,7 +141,28 @@ PID_Loss compute_pid_losses(const std::vector<double>& actual_position, const st
     return {p_loss, i_loss, d_loss, total_loss};
 }
 
-
+void tune_feedforward (lemlib::Chassis& chassis, std::vector<float> velocities, bool tune_angular = 0) {
+    lemlib::PID feed_fowrward_pid(0.1, 0, 0, 0); // a placeholder until 0.6 comes out with FAPID
+    lemlib::PID regular_pid = tune_angular ? chassis.angularPID : chassis.lateralPID; // make sure F gain is zero
+    if (!tune_angular) {
+        for (int i = 0; i < velocities.size(); ++i) {
+            std::clamp(velocities[i], 1.0f, 126.0f); // ensure that velocities are in range
+            chassis.moveToPoint(10000, 0, 100000, {.maxSpeed=velocities[i+1], .minSpeed=velocities[i-1]});
+            pros::delay(500); // let the drive warm up to its velocity
+            /*
+            // find a method to get the input to the regular PID
+            double output = regular_pid.get_output();
+            //double ff_output = feed_fowrward_pid.update();
+            //double difference = output - ff_output;
+            //while (difference > 0.0) {
+                feed_fowrward_pid.F_gain[i] += 0.01; // increment F gain by 0.01 until the difference is less than 0.0
+            }
+            */
+        }
+    } else {
+        // figure this out later, projecly after the fork 
+    }
+}
 
 // needs the main implementation of motor input along with LemLib's PID control. Maybe in a new file due to complexity?
 // tune the dynamic weights
