@@ -19,10 +19,10 @@ struct GradientDescent
         if (gradients.size()!= params.size()) {
             throw std::invalid_argument("Gradients and losses must have the same size");
         }
-        while (!gradients.size() == params.size()) {
+        while (!(gradients.size() == params.size())) {
             gradients.push_back(0.0f);
         }
-        while (!last_losses.size() == losses.size()) {
+        while (!(last_losses.size() == losses.size())) {
             last_losses.push_back(0.0f);
         }
         for (int k = 0; k < losses.size(); ++k) {
