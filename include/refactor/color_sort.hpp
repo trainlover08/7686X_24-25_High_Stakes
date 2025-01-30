@@ -5,7 +5,7 @@
 #include "pros/distance.hpp"
 
 class Color_Sort {
-    public:
+public:
     Color_Sort(pros::Optical *optical, pros::Distance *distance);
 
     pros::Color get_color();
@@ -15,7 +15,7 @@ class Color_Sort {
     pros::Color object_color();
 
     pros::Color last_color;
-    private:
+private:
     pros::Optical *optical;
     pros::Distance *distance;
 };

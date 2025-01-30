@@ -39,49 +39,49 @@ struct GradientDescent
 void write_file(std::vector<double> &gradients, std::vector<double> &params, std::string filename)
 {
     // check the validity of the file name
-    if (!filename.starts_with("/usd/"))
-    {
+    if (!filename.starts_with("/usd/")) {
         throw std::invalid_argument("File name must start with '/usd/'");
     }
-    if (!filename.ends_with(".txt"))
-    {
+    
+    if (!filename.ends_with(".txt")) {
         throw std::invalid_argument("File name must end with '.txt'");
     }
+    
     // make sure the vectors have the same size
-    if (gradients.size() != params.size())
-    {
+    if (gradients.size() != params.size()) {
         throw std::invalid_argument("Gradients and parameters must have the same size");
     }
+    
     // take the mutex
     pros::Mutex mtx;
     mtx.take();
     std::ofstream file(filename);
+    
     // check to makesure the file is open
-    if (!file)
-    {
+    if (!file) {
         mtx.give();
         throw std::runtime_error("Could not open file for writing");
     }
+    
     // write the gradients and parameters to the file
-    for (int i = 0; i < gradients.size(); ++i)
-    {
+    for (int i = 0; i < gradients.size(); ++i) {
         file << gradients[i] << " " << params[i] << "\n";
     }
+    
     file.close();
     mtx.give();
 }
 
-std::pair<std::vector<double>, std::vector<double>> read_file(std::string filename)
-{
+std::pair<std::vector<double>, std::vector<double>> read_file(std::string filename) {
     // check the validity of the file name
-    if (!filename.starts_with("/usd/"))
-    {
+    if (!filename.starts_with("/usd/")) {
         throw std::invalid_argument("File name must start with '/usd/'");
     }
-    if (!filename.ends_with(".txt"))
-    {
+
+    if (!filename.ends_with(".txt")) {
         throw std::invalid_argument("File name must end with '.txt'");
     }
+
     std::vector<double> gradients;
     std::vector<double> params;
     std::string line;
@@ -90,18 +90,16 @@ std::pair<std::vector<double>, std::vector<double>> read_file(std::string filena
     mtx.take();
     std::ifstream file(filename);
     // check to makesure the file is open
-    if (!file)
-    {
+    if (!file) {
         mtx.give();
         throw std::runtime_error("Could not open file for reading");
     }
+
     // read the gradients and parameters from the file
-    while (std::getline(file, line))
-    {
+    while (std::getline(file, line)) {
         std::istringstream iss(line);
         double gradient, param;
-        if (!(iss >> gradient >> param))
-        {
+        if (!(iss >> gradient >> param)) {
             mtx.give();
             throw std::runtime_error("Invalid format in the file");
         }
