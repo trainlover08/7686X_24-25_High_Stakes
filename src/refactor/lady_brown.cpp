@@ -1,4 +1,4 @@
-#include "lady_brown.hpp"
+#include "refactor/lady_brown.hpp"
 
 Lady_Brown::Lady_Brown(pros::Motor* motor, pros::Rotation* rotation, lemlib::PID* pid) {
     this->motor = motor;

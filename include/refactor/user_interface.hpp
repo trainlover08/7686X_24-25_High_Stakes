@@ -1,4 +1,5 @@
-// includes here
+#include "pros/misc.hpp"
+#include <vector>
 
 class Mapable_Controller {
 public:
