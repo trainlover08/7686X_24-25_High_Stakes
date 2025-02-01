@@ -1,5 +1,6 @@
 #include "robot/autos.cpp"
 #include "main.h"
+#include "dimentions.hpp"
 
 void initialize() {
     selector.focus();
