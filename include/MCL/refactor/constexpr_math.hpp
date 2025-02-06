@@ -8,4 +8,5 @@ namespace cxprmath {
     constexpr double clean_angle_degrees (double t);
     constexpr double deg_to_rad(double t);
     constexpr double M_PI = 3.14159265358979323846;
+    constexpr double abs (double x);
 };
