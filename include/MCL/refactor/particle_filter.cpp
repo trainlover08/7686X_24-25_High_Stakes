@@ -49,16 +49,31 @@ constexpr Filter::Robot::Robot (lemlib::Pose* odom_pose, std::vector<Sensor*> se
 }
 
 constexpr std::array<double, 2> Filter::find_intercept (double global_theta, double x, double y) {
-    // x and y are in 0:144 format
-    if (global_theta > 0 && global_theta <= 90) {
-        double solution_1 = x + (cxprmath::sin(global_theta) * (cxprmath::sin(180.0 - (90.0 + global_theta)) / 144.0 - y));
-        double solution_2 = y + (cxprmath::sin(90.0 - global_theta) * (cxprmath::sin(180.0 - global_theta) / 144.0 - x));
-        return (solution_1 > 144.0 || solution_1 < 0.0) ? {144.0, solution_2} : {solution_1, 144.0};
-    } else if (global_theta > 90 && global_theta <= 180) {
-        // @todo fill the rest of this out
-    } else if (global_theta > 180 && global_theta <= 270) {
-
+    double theta_rad = cxprmath::deg_to_rad(global_theta);
+    
+    double cos_theta = cxprmath::cos(theta_rad);
+    double sin_theta = cxprmath::sin(theta_rad);
+    
+    double t_x, t_y;
+    if (cos_theta > 0) {
+        t_x = (144.0 - x) / cos_theta;
+    } else if (cos_theta < 0) {
+        t_x = (0.0 - x) / cos_theta;
     } else {
-
+        t_x = 1e9;
     }
+    
+    if (sin_theta > 0) {
+        t_y = (144.0 - y) / sin_theta;
+    } else if (sin_theta < 0) {
+        t_y = (0.0 - y) / sin_theta;
+    } else {
+        t_y = 1e9;
+    }
+    
+    // find first intercept
+    double t = (t_x < t_y) ? t_x : t_y;
+    
+    return { x + t * cos_theta, y + t * sin_theta };
+}
 }
