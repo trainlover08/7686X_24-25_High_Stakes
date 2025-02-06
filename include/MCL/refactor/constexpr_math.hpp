@@ -6,4 +6,5 @@ namespace cxprmath {
     constexpr double cos (double x);
     constexpr double sin (double x);
     constexpr double clean_angle_degrees (double t);
+    constexpr double deg_to_rad(double t);
 };
