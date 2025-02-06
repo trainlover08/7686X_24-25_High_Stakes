@@ -38,4 +38,6 @@ public:
     };
 
     constexpr std::array<double, 2> find_intercept (double global_theta, double x, double y);
+
+    constexpr double calculate_distance (std::array<std::array<double, 2>, 2>);
 };
