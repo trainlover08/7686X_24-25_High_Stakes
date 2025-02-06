@@ -78,5 +78,5 @@ constexpr std::array<double, 2> Filter::find_intercept (double global_theta, dou
 }
 
 constexpr double Filter::calculate_distance (std::array<std::array<double, 2>, 2> arr) {
-    return cxprmath::hypot();
+    return cxprmath::hypot(cxprmath::abs(arr[0][0] - arr[1][0]), cxprmath::abs(arr[0][1] - arr[1][1]));
 }
