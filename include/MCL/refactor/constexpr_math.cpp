@@ -35,3 +35,7 @@ constexpr double cxprmath::clean_angle_degrees (double t) {
     }
     return sign ? t *= -1.0 : t;
 }
+
+constexpr double cxprmath::deg_to_rad (double t) {
+    return (t / 180.0) * cxprmath::M_PI;
+}
