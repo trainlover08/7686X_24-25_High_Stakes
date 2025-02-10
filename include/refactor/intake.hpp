@@ -9,6 +9,7 @@
 #include <vector>
 
 class Intake {
+public:
     Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort* lower_sort, Color_Sort* upper_sort);
     Intake(pros::Motor* lower_intake, pros::Motor* upper_intake);
 
