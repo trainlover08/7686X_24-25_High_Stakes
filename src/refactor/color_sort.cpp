@@ -1,5 +1,7 @@
 #include "refactor/color_sort.hpp"
 
+/** @todo Finish this file. Not in a working state */
+
 Color_Sort::Color_Sort (pros::Optical *optical, pros::Distance *distance) {
     this->optical = optical;
     this->distance = distance;

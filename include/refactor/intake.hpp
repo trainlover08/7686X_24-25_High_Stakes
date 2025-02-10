@@ -9,6 +9,7 @@
 
 class Intake {
     Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort* lower_sort, Color_Sort* upper_sort);
+    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake);
     bool is_scheduled_motion();
     std::vector<double> hook_poses;
     void move_hook_to_ready();

@@ -8,6 +8,13 @@ Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort*
      this->upper_sort = upper_sort;
 }
 
+Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake) {
+     this->lower_intake = lower_intake;
+     this->upper_intake = upper_intake;
+     this->lower_sort = nullptr;
+     this->upper_sort = nullptr;
+}
+
 double Intake::convert_angle_to_length (double angle) {
      // centigrees to degrees
      angle /= 100;
