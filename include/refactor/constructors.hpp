@@ -32,11 +32,11 @@ lemlib::ControllerSettings lateral_controller(
     drivetrain_lateral_p_gain,                                           //kP
     drivetrain_lateral_i_gain,                                           //kI
     drivetrain_lateral_d_gain,                                           //kD
-    0,                                           //anti windup
-    0,                                           //small error range (inches)
-    0,                                           //small error timeout (ms)
-    0,                                           //large error range (inches)
-    0,                                           //large error timeout (ms)
+    3,                                           //anti windup
+    1,                                           //small error range (inches)
+    100,                                           //small error timeout (ms)
+    3,                                           //large error range (inches)
+    500,                                           //large error timeout (ms)
     0                                            //slew (m/s^2)
 );
 
@@ -44,11 +44,11 @@ lemlib::ControllerSettings angular_controller(
     drivetrain_angular_p_gain,                                           //kP
     drivetrain_angular_i_gain,                                           //kI
     drivetrain_angular_d_gain,                                           //kD
-    0,                                           //anti windup
-    0,                                           //small error range (inches)
-    0,                                           //small error timeout (ms)
-    0,                                           //large error range (inches)
-    0,                                           //large error timeout (ms)
+    3,                                           //anti windup
+    1,                                           //small error range (inches)
+    100,                                           //small error timeout (ms)
+    3,                                           //large error range (inches)
+    500,                                           //large error timeout (ms)
     0                                            //slew (m/s^2)
 );
 
