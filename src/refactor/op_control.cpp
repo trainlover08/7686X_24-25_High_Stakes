@@ -1,7 +1,5 @@
-#pragma once
-
-#include "constructors.cpp"
-#include "auto_control.cpp"
+/*#include "constructors.hpp"
+//#include "op_control.hpp"
 
 void intake_task () {
     while (1) {
@@ -15,7 +13,7 @@ void intake_task () {
 }
 
 void ui_task () {
-    selector.focus();
+    //selector.focus();
 }
 
 void drive_task () {
@@ -35,4 +33,4 @@ void misc_task () {
         }
         pros::delay(10);
     }
-}
+}*/

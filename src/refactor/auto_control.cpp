@@ -1,6 +1,3 @@
-#pragma once
+#include "auto_control.hpp"
 
-#include "auto_paths.cpp"
-#include "robodash/apix.h"
-
-rd::Selector selector({});
+//rd::Selector selector({});

@@ -1,5 +1,5 @@
-#include "op_control.cpp"
-#include "main.h"
+#include "op_control.hpp"
+//#include "main.h"
 #include "dimentions.hpp"
 
 void initialize() {
