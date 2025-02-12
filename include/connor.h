@@ -1,21 +1,22 @@
-#pragma once // this is a preprocessor directive. do not touch
+
+ #pragma once // this is a preprocessor directive. do not touch
 
 // change the values after #define. should be self explanitory
-#define front_left_drive_motor 1
-#define middle_left_drive_motor 2
-#define back_left_drive_motor 3
-#define front_right_drive_motor -4
-#define middle_right_drive_motor -5
-#define back_right_drive_motor -6
-#define front_stage_intake_motor 7
-#define hook_stage_intake_motor 8
-#define lady_brown_motor_port 9
+#define front_left_drive_motor -12
+#define middle_left_drive_motor -14
+#define back_left_drive_motor -17
+#define front_right_drive_motor 11
+#define middle_right_drive_motor 18
+#define back_right_drive_motor 15
+#define front_stage_intake_motor 20
+#define hook_stage_intake_motor -5
+#define lady_brown_motor_port 0
 
-#define mogo_mech_port 'A' // make sure digital ports have a set of '' or are of type char
-#define doinker_port 'B'
+#define mogo_mech_port 'G' // make sure digital ports have a set of '' or are of type char
+#define doinker_port 'D'
 
-#define vertical_odom_pod_rotation_sensor 10
-#define lady_brown_rotation_sensor 11
+#define vertical_odom_pod_rotation_sensor 1
+#define lady_brown_rotation_sensor 0
 
 #define imu_port 12
 

@@ -9,6 +9,8 @@ void intake_task () {
             intake.move();
         } else if (extake_button.is_pressing()) {
             intake.move(true);
+        } else {
+            intake.stop();
         }
         pros::delay(10);
     }

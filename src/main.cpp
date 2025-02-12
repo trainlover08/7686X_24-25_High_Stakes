@@ -1,8 +1,9 @@
-#include "op_control.hpp"
-//#include "main.h"
+#include "refactor/op_control.hpp"
+#include "main.h"
 #include "dimentions.hpp"
 
 void initialize() {
+    chassis.setPose(0, 0, 0);
     chassis.calibrate();
 }
 
