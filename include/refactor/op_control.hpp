@@ -22,8 +22,13 @@ void ui_task () {
 
 void drive_task () {
     while (1) {
-        // switch from curve to low-speed arcade
-        chassis.curvature(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y), master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
+        int x = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int y = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        if (cxprmath::abs(x) < 5 || cxprmath::abs(y) < 5) {
+            chassis.arcade(x, y);
+        } else {
+            chassis.curvature(x, y);
+        }
         pros::delay(10);
     }
 }
