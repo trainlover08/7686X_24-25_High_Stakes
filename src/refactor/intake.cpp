@@ -47,6 +47,10 @@ void Intake::move (bool reverse, double percentage) {
      this->upper_intake->move(percentage);
 }
 
+void Intake::move_lower () {
+     this->lower_intake->move(12000);
+}
+
 void Intake::move_lower (double percentage) {
      this->lower_intake->move((percentage * 12000.0) / 100.0);
 }
@@ -54,6 +58,10 @@ void Intake::move_lower (double percentage) {
 void Intake::move_lower (double percentage, bool reverse) {
      percentage *= reverse * 2 - 1;
      this->move_lower(percentage);
+}
+
+void Intake::move_upper () {
+     this->upper_intake->move(12000);
 }
 
 void Intake::move_upper (double percentage) {

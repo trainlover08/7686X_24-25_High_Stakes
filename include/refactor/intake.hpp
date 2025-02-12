@@ -16,8 +16,10 @@ public:
     void move();
     void move(bool reverse);
     void move(bool reverse, double percentage);
+    void move_lower();
     void move_lower(double percentage); 
     void move_lower(double percentage, bool reverse);
+    void move_upper();
     void move_upper(double percentage);
     void move_upper(double percentage, bool reverse);
     void stop();
