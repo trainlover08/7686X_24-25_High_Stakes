@@ -7,7 +7,7 @@
 
 using namespace dimensions::all;
 
-void red_right_goal_rush () {
+void red_right () {
     chassis.setPose(-TILE * 2.0 - DRIVE_LENGTH / 2.0, -TILE - DRIVE_WIDTH / 2.0, RED_STATION);
     chassis.moveToPoint(-TILE * 1.5, -TILE - (1 / 3) * TILE, 2000, {.forwards=0});
     chassis.turnToPoint(-TILE, -TILE, 500, {.forwards=0});
@@ -42,7 +42,17 @@ void red_right_goal_rush () {
     chassis.moveToPoint(-TILE * 2, -TILE * 2, 2000, {.forward=false}, false);
     doinker_piston.retract();
     pros::delay(250);
+}
+
+void red_right_goal_rush () {
+    red_right();
     chassis.moveToPose(-DRIVE_LENGTH / 2 - 2, -TILE * 3 + 2 + DRIVE_WIDTH / 2, BLUE_STATION, 5000, {});
+}
+
+void red_right_goal_rush () {
+    red_right();
+    chassis.moveToPose(-TILE, -TILE, BLUE_STATION, 2000, {.minSpeed=1, .earlyExitRange=2});
+    chassis.moveToPoint(-DRIVE_LENGTH, -TILE, 2000, {});
 }
 
 void pre_match_red_right_elims () {
