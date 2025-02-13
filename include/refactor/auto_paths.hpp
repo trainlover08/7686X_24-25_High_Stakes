@@ -30,10 +30,19 @@ void red_right_goal_rush () {
     mogo_mech_piston.retract();
     chassis.moveToPoint(-TILE, -TILE * 2, 1000, {.forwards=0}, 0);
     mogo_mech_piston.extend();
-    chassis.moveToPose(-DRIVE_LENGTH / 2 - 2, -TILE * 3 + 2 + DRIVE_WIDTH / 2, BLUE_STATION, 5000, {});
+    pros::delay(250);
+    chassis.moveToPoint(TILE * -2.5, TILE * -2, 2000, {});
     intake.move();
     pros::delay(500);
     intake.stop_lower();
+    chassis.turnToPoint(-TILE * 3 + RING / 2.0 + DRIVE_WIDTH / 2.0, -TILE * 3 + RING / 2 + DRIVE_LENGTH / 2 + DOINKER_LENGTH, 500);
+    chassis.moveToPose(-TILE * 3 + RING / 2.0 + DRIVE_WIDTH / 2.0, -TILE * 3 + RING / 2 + DRIVE_LENGTH / 2 + DOINKER_LENGTH, AUDIENCE, 2000, {}, false);
+    doinker_piston.extend();
+    pros::delay(500);
+    chassis.moveToPoint(-TILE * 2, -TILE * 2, 2000, {.forward=false}, false);
+    doinker_piston.retract();
+    pros::delay(250);
+    chassis.moveToPose(-DRIVE_LENGTH / 2 - 2, -TILE * 3 + 2 + DRIVE_WIDTH / 2, BLUE_STATION, 5000, {});
 }
 
 void pre_match_red_right_elims () {
