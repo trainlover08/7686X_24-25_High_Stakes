@@ -3,7 +3,7 @@
 #include "auto_paths.hpp"
 #include "robodash/apix.h"
 
-rd::Selector selector({}); // still need to add this
+rd::Selector selector({});
 
 void cancel_auto_motion () {
     while (1) {

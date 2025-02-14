@@ -14,7 +14,7 @@ pros::Motor lower_intake_motor(front_stage_intake_motor, pros::MotorCart::blue);
 pros::Motor upper_intake_motor(hook_stage_intake_motor, pros::MotorCart::blue);
 pros::Motor lady_brown_motor(lady_brown_motor_port, pros::MotorCart::blue);
 
-pros::adi::Pneumatics mogo_mech_piston(mogo_mech_port, false);
+pros::adi::Pneumatics mogo_mech_piston(mogo_mech_port, true);
 pros::adi::Pneumatics doinker_piston(doinker_port, false);
 
 pros::Rotation vertical_tracking_wheel(vertical_odom_pod_rotation_sensor);
@@ -78,9 +78,10 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 Mapable_Controller main_controller(&master);
 
-Mapable_Controller::Button_Combo intake_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_L1});
-Mapable_Controller::Button_Combo extake_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_R1});
-Mapable_Controller::Button_Combo mogo_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_DOWN});
+Mapable_Controller::Button_Combo intake_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_R1});
+Mapable_Controller::Button_Combo extake_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_L1});
+Mapable_Controller::Button_Combo mogo_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_B});
+Mapable_Controller::Button_Combo doinker_button (main_controller.controller, {pros::E_CONTROLLER_DIGITAL_L2});
 
 Intake intake(&lower_intake_motor, &upper_intake_motor);
 Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_controller);

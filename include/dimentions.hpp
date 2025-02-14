@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <cmath>
 
 namespace dimensions {
@@ -45,7 +44,7 @@ namespace dimensions {
         constexpr float MIN_Y = -MAX_Y;
 
         /** Diameter of the rings */
-        constexpr float RING_DIAM = 7;
+        constexpr float RING = 7;
 
         /** Mogo dimentions */
         constexpr float MOGO_FLATEDGE = TILE - 18.5;
@@ -91,9 +90,9 @@ namespace dimensions {
 
     namespace robot {
         /** @todo change to correct track width */
-        constexpr float TRACK_WIDTH = 16.5 - 1. / 8;
-        constexpr float DRIVE_WIDTH = 29.0 / 2 + 1. / 8;
-        constexpr float DRIVE_LENGTH = 32.0 / 2;
+        constexpr float TRACK_WIDTH = 12.25;
+        constexpr float DRIVE_WIDTH = 15.0;
+        constexpr float DRIVE_LENGTH = 16.0;
     } // namespace robot
 
     namespace all {

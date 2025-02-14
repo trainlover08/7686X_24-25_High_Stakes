@@ -1,6 +1,8 @@
 #pragma once
 
 #include "constructors.hpp"
+#include "refactor/intake.hpp"
+#include <cmath>
 //#include "op_control.hpp"
 
 void intake_task () {
@@ -24,7 +26,7 @@ void drive_task () {
     while (1) {
         int x = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int y = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        if (cxprmath::abs(x) < 5 || cxprmath::abs(y) < 5) {
+        if (abs(x) < 5 || abs(y) < 5) {
             chassis.arcade(x, y);
         } else {
             chassis.curvature(x, y);
@@ -34,12 +36,24 @@ void drive_task () {
 }
 
 void misc_task () {
+    pros::Mutex mut;
     while (1) {
         if (mogo_button.is_pressing()) {
             mogo_mech_piston.toggle();
             while (mogo_button.is_pressing()) {
                 pros::delay(10);
+                if (!mogo_mech_piston.is_extended()) {
+                    mut.take();
+                    intake.move_upper(100, false);
+                    pros::delay(200);
+                    mut.give();
+                }
             }
+        }
+        if (doinker_button.is_pressing()) {
+            doinker_piston.extend();
+        } else {
+            doinker_piston.retract();
         }
         pros::delay(10);
     }
