@@ -1,9 +1,6 @@
-#include "include/MCL/refactor/particle_filter.hpp"
+#include "particle_filter.hpp"
 #include <random>
-
-Filter::Filter () {
-
-}
+#include "constexpr_math.hpp"
 
 MCL::MCL (lemlib::Pose* pose, std::vector<sensor> sensors) {
     sensor_vec.resize(sensors.size());
@@ -38,11 +35,6 @@ constexpr void Filter::Particle::update (double x, double y, double theta) {
 
 constexpr std::array<double, 3> Filter::Particle::grad () {
     return {this->x_1 - this->x_2, this->y_1 - this->y_2, this->theta_1 - this->theta_2};
-}
-
-Filter::Robot::Robot (lemlib::Pose* odom_pose, std::vector<Sensor*> sensor_vector) {
-    this->odom_pose = odom_pose;
-    this->sensor_vector = sensor_vector;
 }
 
 Filter::Sensor::Sensor (pros::Distance* d, double x, double y, double theta) {
@@ -149,8 +141,8 @@ constexpr std::array<Filter::Particle*, 20> Filter::Monte_Carlo::select (std::ar
             double rotated_x = sensor_x * cxprmath::cos(field_theta) - sensor_y * cxprmath::sin(field_theta);
             double rotated_y = sensor_x * cxprmath::sin(field_theta) + sensor_y * cxprmath::cos(field_theta);
 
-            field_x =+ rotated_x;
-            field_y =+ rotated_y;
+            field_x += rotated_x;
+            field_y += rotated_y;
 
             field_theta = cxprmath::clean_angle_degrees(field_theta + sensor_theta, true);
 
@@ -158,7 +150,7 @@ constexpr std::array<Filter::Particle*, 20> Filter::Monte_Carlo::select (std::ar
             std::array<double, 2> robot_pose = {field_x, field_y};
             double distance = helper::calculate_distance({robot_pose, intercept});
 
-            p_arr[i]->fitness =+ calculate_loss(s->distance(s->get_raw()), distance, s->get_raw());
+            p_arr[i]->fitness += calculate_loss(s->distance(s->get_raw()), distance, s->get_raw());
         }
         p_arr[i]->fitness /= r->sensor_vector.size();
         fitness_arr[i] = p_arr[i]->fitness;
@@ -201,7 +193,7 @@ std::array<Filter::Particle*, 100> Filter::Monte_Carlo::mutate (std::array<Filte
 
 constexpr void Filter::Particle::update_for_odom (lemlib::Pose* pose) {
     Filter::Particle::last_pose = pose;
-    lemlib::Pose d_pose (pose->x - last_pose->x, pose->y - last_pose->y, pose->theta - last_pose->theta);
+    My_Pose d_pose (pose->x - last_pose->x, pose->y - last_pose->y, pose->theta - last_pose->theta);
     double dx = d_pose.x;
     double dy = d_pose.y;
     double dtheta = cxprmath::clean_angle_degrees(d_pose.theta, true);
@@ -213,7 +205,7 @@ constexpr void Filter::Particle::update_for_odom (lemlib::Pose* pose) {
     Filter::Particle::theta_2 = cxprmath::clean_angle_degrees(Filter::Particle::theta_2 + dtheta, true);
 }
 
-constexpr lemlib::Pose Filter::Monte_Carlo::weighted_average (std::array<Particle*, 20> p_arr) {
+constexpr lemlib::Pose* Filter::Monte_Carlo::weighted_average (std::array<Particle*, 20> p_arr) {
     double total_weight = 0.0;
     double x_sum = 0.0;
     double y_sum = 0.0;
@@ -226,7 +218,7 @@ constexpr lemlib::Pose Filter::Monte_Carlo::weighted_average (std::array<Particl
         sin_sum += p_arr[i]->fitness * cxprmath::sin(p_arr[i]->theta_1);
         cos_sum += p_arr[i]->fitness * cxprmath::cos(p_arr[i]->theta_1);
     }
-    lemlib::Pose pose (x_sum / total_weight, y_sum / total_weight, cxprmath::rad_to_degrees(cxprmath::atan2(sin_sum, cos_sum)));
+    lemlib::Pose (x_sum / total_weight, y_sum / total_weight, cxprmath::rad_to_degrees(cxprmath::atan2(sin_sum, cos_sum)));
     return pose;
 }
 
@@ -235,10 +227,10 @@ lemlib::Pose* Filter::Monte_Carlo::cycle () {
         population[i]->update_for_odom(pose);
     }
     std::array<Particle*, 20> best = Filter::Monte_Carlo::select(population, Monte_Carlo::robot);
-    lemlib::Pose p = Filter::Monte_Carlo::weighted_average(best);
+    lemlib::Pose* p = Filter::Monte_Carlo::weighted_average(best);
     population = Filter::Monte_Carlo::breed(best);
     population = Filter::Monte_Carlo::mutate(population);
-    return &p;
+    return p;
 }
 
 Filter::Monte_Carlo::Monte_Carlo(Robot* robot) {
@@ -247,7 +239,7 @@ Filter::Monte_Carlo::Monte_Carlo(Robot* robot) {
     // initialize particles
     for (int i = 0; i < 100; ++i) {
         Filter::Particle* p = new Filter::Particle(pose->x, pose->y, pose->theta);
-        population[i];
+        population[i] = p;
     }
     Monte_Carlo::mutate(population);
 }

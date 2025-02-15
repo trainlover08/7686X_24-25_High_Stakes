@@ -4,14 +4,18 @@
 #include "lemlib/pose.hpp"
 #include <array>
 #include <vector>
-#include "constexpr_math.hpp"
 
 class Filter {
 public:
 
+    struct My_Pose {
+    public:
+        double x, y, theta;
+    };
+
     class Particle {
     public:
-        Particle(double x, double y, double theta);
+        constexpr Particle(double x, double y, double theta);
         double x_1, y_1, theta_1;
         double x_2, y_2, theta_2;
         constexpr void update(double x, double y, double theta);
@@ -33,7 +37,7 @@ public:
 
     class Robot {
     public:
-        Robot(lemlib::Pose* odom_pose, std::vector<Sensor*> sensor_vector);
+        constexpr Robot(lemlib::Pose* odom_pose, std::vector<Sensor*> sensor_vector);
         lemlib::Pose* odom_pose;
         std::vector<Sensor*> sensor_vector;
     };
@@ -47,7 +51,7 @@ public:
         lemlib::Pose* cycle ();
         std::array<Particle*, 100> population;
         Robot* robot;
-        constexpr lemlib::Pose weighted_average (std::array<Particle*, 20> p_arr);
+        constexpr lemlib::Pose* weighted_average (std::array<Particle*, 20> p_arr);
         lemlib::Pose* pose;
     };
 };
@@ -74,4 +78,6 @@ namespace helper {
     constexpr double calculate_loss (double o, double e, int raw);
     template <typename T, std::size_t N>
     constexpr std::array<int, N> bubble_sort(std::array<T, N> arr);
+    constexpr double rayBoxIntersection (double x0, double y0, double dx, double dy, double x_min, double x_max, double y_min, double y_max);
+    constexpr double findSquareInterceptDistance(double x0, double y0, double theta);
 };

@@ -3,7 +3,7 @@
 #include "auto_paths.hpp"
 #include "robodash/apix.h"
 
-rd::Selector selector({});
+rd::Selector selector({{"Red Right", red_right_goal_rush}, {"Blue Left", blue_left_goal_rush}});
 
 void cancel_auto_motion () {
     while (1) {
