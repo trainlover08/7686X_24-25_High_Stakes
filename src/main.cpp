@@ -20,8 +20,8 @@ void competition_initialize () {
 }
 
 void autonomous() {
-    selector.run_auton();
     auto_ran = 1;
+    selector.run_auton();
 }
 
 void opcontrol () {

@@ -1,7 +1,7 @@
 #pragma once // this is a preprocessor directive. do not touch
 
 // change the values after #define. should be self explanitory
-#define front_left_drive_motor -12
+#define front_left_drive_motor -3
 #define middle_left_drive_motor -14
 #define back_left_drive_motor -17
 #define front_right_drive_motor 11
@@ -23,10 +23,10 @@
 
 #define drivetrain_lateral_p_gain 18.0 //P, I, D. Dont play with these right before match
 #define drivetrain_lateral_i_gain 1.0
-#define drivetrain_lateral_d_gain 80.0
+#define drivetrain_lateral_d_gain 250.0
 #define drivetrain_angular_p_gain 4.0
 #define drivetrain_angular_i_gain 0.5
-#define drivetrain_angular_d_gain 24.0
+#define drivetrain_angular_d_gain 30.0
 #define lb_p_gain 1 //P, I, D for the lady brown controller
 #define lb_i_gain 2
 #define lb_d_gain 3

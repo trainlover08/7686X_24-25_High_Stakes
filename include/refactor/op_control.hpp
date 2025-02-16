@@ -5,14 +5,18 @@
 #include <cmath>
 //#include "op_control.hpp"
 
+bool mut = 1;
+
 void intake_task () {
     while (1) {
-        if (intake_button.is_pressing()) {
-            intake.move();
-        } else if (extake_button.is_pressing()) {
-            intake.move(true);
-        } else {
-            intake.stop();
+        if (mut) {
+            if (intake_button.is_pressing()) {
+                intake.move();
+            } else if (extake_button.is_pressing()) {
+                intake.move(true);
+            } else {
+                intake.stop();
+            }
         }
         pros::delay(10);
     }
@@ -36,18 +40,17 @@ void drive_task () {
 }
 
 void misc_task () {
-    pros::Mutex mut;
     while (1) {
         if (mogo_button.is_pressing()) {
             mogo_mech_piston.toggle();
+            if (!mogo_mech_piston.is_extended()) {
+                mut=0;
+                intake.move_upper(100, false);
+                pros::delay(100);
+                mut=1;
+            }
             while (mogo_button.is_pressing()) {
                 pros::delay(10);
-                if (!mogo_mech_piston.is_extended()) {
-                    mut.take();
-                    intake.move_upper(100, false);
-                    pros::delay(200);
-                    mut.give();
-                }
             }
         }
         if (doinker_button.is_pressing()) {
