@@ -7,9 +7,10 @@ namespace lemlib {
     public:
         using Chassis::Chassis;
 
-        Mod_Chassis (Drivetrain drivetrain, ControllerSettings linearSettings, ControllerSettings angularSettings, OdomSensors sensors, DriveCurve* throttleCurve = &defaultDriveCurve, DriveCurve* steerCurve = &defaultDriveCurve);
-
-        Chassis chassis;
+        Mod_Chassis (Drivetrain drivetrain, ControllerSettings linearSettings, 
+        ControllerSettings angularSettings, OdomSensors sensors, 
+        DriveCurve* throttleCurve = &defaultDriveCurve, 
+        DriveCurve* steerCurve = &defaultDriveCurve);
 
         void moveRelative (float distance, unsigned int timeout, bool reverse=0, bool async=1);
         void turnRelative (float angle, unsigned int timeout, bool reverse=0, bool async=1);

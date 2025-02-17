@@ -4,6 +4,8 @@
 
 namespace lemlib {
 
+    Mod_Chassis::Mod_Chassis (Drivetrain drivetrain, ControllerSettings linearSettings, ControllerSettings angularSettings, OdomSensors sensors, DriveCurve* throttleCurve, DriveCurve* steerCurve) : Chassis(drivetrain, linearSettings, angularSettings, sensors, throttleCurve, steerCurve) {}
+
     void Mod_Chassis::moveRelative (float distance, unsigned int timeout, bool reverse, bool async) {
         Pose pose = this->getPose();
         float x = cos(pose.theta) * distance + pose.x;

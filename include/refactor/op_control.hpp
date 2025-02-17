@@ -1,5 +1,6 @@
 #pragma once
 
+#include "connor.h"
 #include "constructors.hpp"
 #include "refactor/intake.hpp"
 #include <cmath>
@@ -10,9 +11,9 @@ bool mut = 1;
 void intake_task () {
     while (1) {
         if (mut) {
-            if (intake_button.is_pressing()) {
+            if (intake_button_combo.is_pressing()) {
                 intake.move();
-            } else if (extake_button.is_pressing()) {
+            } else if (extake_button_combo.is_pressing()) {
                 intake.move(true);
             } else {
                 intake.stop();
@@ -28,12 +29,12 @@ void ui_task () {
 
 void drive_task () {
     while (1) {
-        int x = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int y = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-        if (abs(x) < 5 || abs(y) < 5) {
-            chassis.arcade(x, y);
+        int x_axis = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int y_axis = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+        if (abs(x_axis) < 5 || abs(y_axis) < 5) {
+            chassis.arcade(x_axis, y_axis);
         } else {
-            chassis.curvature(x, y);
+            chassis.curvature(x_axis, y_axis);
         }
         pros::delay(10);
     }
@@ -41,7 +42,7 @@ void drive_task () {
 
 void misc_task () {
     while (1) {
-        if (mogo_button.is_pressing()) {
+        if (mogo_button_combo.is_pressing()) {
             mogo_mech_piston.toggle();
             if (!mogo_mech_piston.is_extended()) {
                 mut=0;
@@ -49,11 +50,11 @@ void misc_task () {
                 pros::delay(100);
                 mut=1;
             }
-            while (mogo_button.is_pressing()) {
+            while (mogo_button_combo.is_pressing()) {
                 pros::delay(10);
             }
         }
-        if (doinker_button.is_pressing()) {
+        if (mogo_button_combo.is_pressing()) {
             doinker_piston.extend();
         } else {
             doinker_piston.retract();

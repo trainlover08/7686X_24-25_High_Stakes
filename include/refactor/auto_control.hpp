@@ -2,7 +2,6 @@
 
 #include "auto_paths.hpp"
 #include "pros/misc.h"
-#include "robodash/apix.h"
 
 rd::Selector selector({{"Red Right", red_right_goal_rush}});
 

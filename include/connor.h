@@ -1,4 +1,6 @@
 #pragma once // this is a preprocessor directive. do not touch
+#include "api.h"
+using namespace pros; 
 
 // change the values after #define. should be self explanitory
 #define front_left_drive_motor -3
@@ -41,4 +43,22 @@
 #define throttle_curve_intensity 26
 #define steer_curve_intensity 22
 
-// @todo Find a good way to do button mapping
+// quick-guide does not support button combos or multiple controllers by default
+#define doinker_button l2
+#define mogo_button x
+#define intake_button r1
+#define extake_button l1
+
+// generally don't touch things below this line
+#define l2 E_CONTROLLER_DIGITAL_L2
+#define l1 E_CONTROLLER_DIGITAL_L1
+#define r2 E_CONTROLLER_DIGITAL_R2
+#define r1 E_CONTROLLER_DIGITAL_R1
+#define x E_CONTROLLER_DIGITAL_X
+#define a E_CONTROLLER_DIGITAL_A
+#define b E_CONTROLLER_DIGITAL_B
+#define y E_CONTROLLER_DIGITAL_Y
+#define up E_CONTROLLER_DIGITAL_UP
+#define down E_CONTROLLER_DIGITAL_DOWN
+#define left E_CONTROLLER_DIGITAL_LEFT
+#define right E_CONTROLLER_DIGITAL_RIGHT
