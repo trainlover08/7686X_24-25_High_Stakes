@@ -1,8 +1,6 @@
 #pragma once
 
 #include "constructors.hpp"
-#include "lemlib/api.hpp"
-#include "pros/apix.h"
 #include "dimentions.hpp"
 
 using namespace dimensions::all;

@@ -4,6 +4,7 @@
 #include "user_interface.hpp"
 #include "lady_brown.hpp"
 #include "intake.hpp"
+#include "relative_wrapper.hpp"
 #include "lemlib/api.hpp"
 #include "robodash/apix.h"
 
@@ -64,7 +65,7 @@ lemlib::ExpoDriveCurve steer_curve(
     1.0 + 0.001 * steer_curve_intensity       //expo curve
 );
 
-lemlib::Chassis chassis(drivetrain, lateral_controller, angular_controller, sensors, &throttle_curve, &steer_curve);
+lemlib::Mod_Chassis chassis(drivetrain, lateral_controller, angular_controller, sensors, &throttle_curve, &steer_curve);
 
 lemlib::PID lady_brown_controller (
     lb_p_gain,                      //kP
