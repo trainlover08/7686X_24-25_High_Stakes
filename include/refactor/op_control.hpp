@@ -6,8 +6,6 @@
 #include <cmath>
 //#include "op_control.hpp"
 
-/**
-
 bool mut = 1;
 
 void intake_task () {
@@ -63,6 +61,16 @@ void misc_task () {
         }
         pros::delay(10);
     }
-}*/
+}
 
-void lady_brown_intake_task ();
+void lady_brown_intake_task () {
+    Lady_Brown::position* pose = &hold;
+    while (1) {
+        if (lb_down_button.is_pressing()) {
+            pose = pose->angle == hold.angle ? pose = &load : pose->angle == load.angle ? pose = &score :  pose = &hold;
+            while (lb_down_button.is_pressing()) pros::delay(10);
+        }
+        lady_brown.move_to_position(pose);
+        pros::delay(10);
+    }
+}

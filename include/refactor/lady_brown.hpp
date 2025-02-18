@@ -15,6 +15,7 @@ class Lady_Brown {
         };
 
         void move_to_position(const position& pos);
+        void move_to_position(const position* pos);
 
         bool is_at_position(const position& pos);
 

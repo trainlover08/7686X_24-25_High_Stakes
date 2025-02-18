@@ -7,8 +7,15 @@ Lady_Brown::Lady_Brown(pros::Motor* motor, pros::Rotation* rotation, lemlib::PID
 }
 
 void Lady_Brown::move_to_position (const Lady_Brown::position& pos) {
-    double error = pos.angle - Lady_Brown::rotation->get_angle();
-    double output = Lady_Brown::pid->update(error);
+    double error = pos.angle - this->rotation->get_angle();
+    double output = this->pid->update(error);
+    this->motor->move(output);
+}
+
+void Lady_Brown::move_to_position (const Lady_Brown::position* pos) {
+    double error = pos->angle - this->rotation->get_angle();
+    double output = this->pid->update(error);
+    this->motor->move(output);
 }
 
 bool Lady_Brown::is_at_position (const Lady_Brown::position& pos) {

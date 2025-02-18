@@ -50,7 +50,7 @@ using namespace pros;
 #define mogo_button x
 #define intake_button r1
 #define extake_button l1
-#define lady_brown_down_button r2
+#define lady_brown_down_button r2 // change macro for now
 #define lady_brown_que_button y
 
 // generally don't touch things below this line
