@@ -21,7 +21,9 @@ using namespace pros;
 
 #define imu_port 2
 
-#define lady_brown_intake_backup_timeout 500 // milliseconds, must be whole number
+#define lady_brown_ready_macro 0.0
+#define lady_brown_load_macro 10.0
+#define lady_brown_score_macro 180.0
 
 #define drivetrain_lateral_p_gain 18.0 //P, I, D. Dont play with these right before match
 #define drivetrain_lateral_i_gain 1.0
@@ -48,6 +50,8 @@ using namespace pros;
 #define mogo_button x
 #define intake_button r1
 #define extake_button l1
+#define lady_brown_down_button r2
+#define lady_brown_que_button y
 
 // generally don't touch things below this line
 #define l2 E_CONTROLLER_DIGITAL_L2

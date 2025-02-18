@@ -1,24 +1,29 @@
 #include "refactor/intake.hpp"
+#include "pros/abstract_motor.hpp"
 #include <cmath>
 
-Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort* lower_sort, Color_Sort* upper_sort) {
+Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort* lower_sort, pros::Rotation* rotation) {
      this->lower_intake = lower_intake;
      this->upper_intake = upper_intake;
      this->lower_sort = lower_sort;
-     this->upper_sort = upper_sort;
+     this->rotation = rotation;
+     for (int i = 0; i < hook_poses.size(); ++i) {
+          hook_poses[i] = (this->chain_length / hook_poses.size()) * i;
+          hook_poses[i] += this->convert_angle_to_length(this->rotation->get_position());
+     }
+     this->pid = new lemlib::PID (this->kP, this->kI, this->kD);
 }
 
 Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake) {
      this->lower_intake = lower_intake;
      this->upper_intake = upper_intake;
      this->lower_sort = nullptr;
-     this->upper_sort = nullptr;
 }
 
 double Intake::convert_angle_to_length (double angle) {
      // centigrees to degrees
      angle /= 100;
-     // multiple my circumference
+     // multiple by circumference
      double distance;
      distance = (angle/360) * (diameter * M_PI);
      // make sure length is always sanitized
@@ -86,9 +91,84 @@ void Intake::stop_upper () {
      this->upper_intake->move(0);
 }
 
-// call as a task
-void Intake::lb_relief() {
-     this->move_upper(100, true);
-     pros::delay(this->lb_relief_timeout);
+pros::Color Intake::get_color () {
+     return this->lower_sort->get_color();
+}
+
+bool Intake::object_detected () {
+     return this->lower_sort->object_detected();
+}
+
+pros::Color Intake::object_color () {
+     pros::Color color= this->lower_sort->object_color();
+     if (color != pros::Color::gray) {
+          this->last_color = color;
+     }
+     return color;
+}
+
+void Intake::update_poses () {
+     double default_pose = this->convert_angle_to_length(this->rotation->get_position());
+     for (int i = 0; i < this->hook_poses.size(); ++i) {
+          this->hook_poses[i] = default_pose + (this->chain_length / this->hook_poses.size()) * i;
+     }
+}
+
+void Intake::nearest_hook_to_pose (double pose, bool reverse) {
+     while (1) {
+          this->update_poses();
+          std::vector<double> error_vec = this->hook_poses;
+          double error;
+          double lerror;
+          for (int i = 0; i < this->hook_poses.size(); ++i) {
+               if (reverse) {
+                    lerror = pose - this->hook_poses[i];
+                    while (lerror < 0.0) lerror+=this->chain_length;
+                    error_vec[i] = lerror;
+               } else {
+                    lerror = this->hook_poses[i] - pose;
+                    while (lerror > this->chain_length) lerror -= this->chain_length;
+                    error_vec[i] = lerror;
+               }
+          }
+          std::sort(error_vec.begin(), error_vec.end());
+          error = error_vec[0];
+          error *= (!reverse * 2) - 1;
+          double output = pid->update(error);
+          this->upper_intake->move_velocity(output);
+          if (0.5 > std::abs(error)) break;
+          pros::delay(10);
+     }
      this->stop_upper();
 }
+
+void Intake::move_hook_to_ready () {
+     this->nearest_hook_to_pose(ready_pose);
+}
+
+void Intake::pickup_and_hold () {
+     this->nearest_hook_to_pose(ready_pose + 3.5);
+     this->nearest_hook_to_pose(ready_pose);
+}
+
+void Intake::load_lb () {
+     this->pickup_and_hold();
+     this->nearest_hook_to_pose(load_lb_pose);
+     this->nearest_hook_to_pose(lb_backup_pose, true);
+     // follow this motion with a move to ready
+}
+
+void Intake::score_ring () {
+     this->move_hook_to_ready();
+     this->upper_intake->move_relative(360.0 * ((this->chain_length * (3.0 / 4.0)) / (M_PI * this->diameter)), 100); // assuming units are degrees
+     this->move_hook_to_ready();
+}
+
+void Intake::sort_ring () {
+     this->pickup_and_hold();
+     this->nearest_hook_to_pose(sort_stop_pose);
+     this->upper_intake->move_velocity(0);
+     pros::delay(250);
+     this->move_hook_to_ready();
+}
+

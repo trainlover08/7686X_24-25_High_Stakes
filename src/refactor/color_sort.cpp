@@ -2,9 +2,8 @@
 
 /** @todo Finish this file. Not in a working state */
 
-Color_Sort::Color_Sort (pros::Optical *optical, pros::Distance *distance) {
+Color_Sort::Color_Sort (pros::Optical *optical) {
     this->optical = optical;
-    this->distance = distance;
 }
 
 pros::Color Color_Sort::get_color () {
@@ -14,7 +13,7 @@ pros::Color Color_Sort::get_color () {
 }
 
 bool Color_Sort::object_detected () {
-    return distance->get_distance() < 4;
+    return optical->get_proximity() < 50;
 }
 
 pros::Color Color_Sort::object_color () {

@@ -84,6 +84,11 @@ Mapable_Controller::Button_Combo intake_button_combo (main_controller.controller
 Mapable_Controller::Button_Combo extake_button_combo (main_controller.controller, {extake_button});
 Mapable_Controller::Button_Combo mogo_button_combo (main_controller.controller, {mogo_button});
 Mapable_Controller::Button_Combo doinker_button_combo (main_controller.controller, {doinker_button});
+Mapable_Controller::Button_Combo lb_down_button (main_controller.controller, {lady_brown_down_button});
+Mapable_Controller::Button_Combo lb_que_button (main_controller.controller, {lady_brown_que_button});
 
 Intake intake(&lower_intake_motor, &upper_intake_motor);
 Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_controller);
+Lady_Brown::position hold({.angle=lady_brown_ready_macro});
+Lady_Brown::position load({.angle=lady_brown_load_macro});
+Lady_Brown::position score({.angle=lady_brown_score_macro});

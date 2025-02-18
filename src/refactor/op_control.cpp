@@ -1,36 +1,5 @@
-/*#include "constructors.hpp"
-//#include "op_control.hpp"
+#include "op_control.hpp"
 
-void intake_task () {
-    while (1) {
-        if (intake_button.is_pressing()) {
-            intake.move();
-        } else if (extake_button.is_pressing()) {
-            intake.move(true);
-        }
-        pros::delay(10);
-    }
+void lady_brown_intake_task () {
+    
 }
-
-void ui_task () {
-    //selector.focus();
-}
-
-void drive_task () {
-    while (1) {
-        chassis.curvature(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y), master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X));
-        pros::delay(10);
-    }
-}
-
-void misc_task () {
-    while (1) {
-        if (mogo_button.is_pressing()) {
-            mogo_mech_piston.toggle();
-            while (mogo_button.is_pressing()) {
-                pros::delay(10);
-            }
-        }
-        pros::delay(10);
-    }
-}*/

@@ -6,6 +6,8 @@
 #include <cmath>
 //#include "op_control.hpp"
 
+/**
+
 bool mut = 1;
 
 void intake_task () {
@@ -61,4 +63,6 @@ void misc_task () {
         }
         pros::delay(10);
     }
-}
+}*/
+
+void lady_brown_intake_task ();
