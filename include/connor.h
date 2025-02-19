@@ -11,29 +11,35 @@ using namespace pros;
 #define back_right_drive_motor 15
 #define front_stage_intake_motor 20
 #define hook_stage_intake_motor -5
-#define lady_brown_motor_port 0
+#define lady_brown_motor_port 4
 
 #define mogo_mech_port 'G' // make sure digital ports have a set of '' or are of type char
 #define doinker_port 'D'
 
 #define vertical_odom_pod_rotation_sensor 9
-#define lady_brown_rotation_sensor 0
+#define lady_brown_pot 'H'
 
 #define imu_port 2
 
-#define lady_brown_ready_macro 0.0
-#define lady_brown_load_macro 10.0
-#define lady_brown_score_macro 180.0
+#define lady_brown_ready_macro 3750
+#define lady_brown_load_macro 3530
+#define lady_brown_score_macro 2100
 
-#define drivetrain_lateral_p_gain 18.0 //P, I, D. Dont play with these right before match
-#define drivetrain_lateral_i_gain 1.0
-#define drivetrain_lateral_d_gain 250.0
+#define drivetrain_lateral_p_gain 14.0 //P, I, D. Dont play with these right before match
+#define drivetrain_lateral_i_gain 0.0
+#define drivetrain_lateral_d_gain 60.0
 #define drivetrain_angular_p_gain 4.0
 #define drivetrain_angular_i_gain 0.5
 #define drivetrain_angular_d_gain 30.0
-#define lb_p_gain 1 //P, I, D for the lady brown controller
-#define lb_i_gain 2
-#define lb_d_gain 3
+#define lb_ready_p_gain 0.8 //P, I, D for the lady brown controller
+#define lb_ready_i_gain 0.001
+#define lb_ready_d_gain 1.4
+#define lb_score_p_gain 0.10
+#define lb_score_i_gain 0
+#define lb_score_d_gain 0.6
+#define lb_return_p_gain 0.04
+#define lb_return_i_gain 0
+#define lb_return_d_gain 0.6
 
 #define drive_width 12.25 // 1. find the middle of the wheel (not the length, the thickness). 2. measure the the distance from the middle of the wheels on both sides.
 #define wheel_diameter 3.25

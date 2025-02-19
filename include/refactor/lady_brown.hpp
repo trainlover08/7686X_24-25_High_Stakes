@@ -1,13 +1,13 @@
 #pragma once
 
 #include "pros/motors.hpp"
-#include "pros/rotation.hpp"
+#include "pros/adi.hpp"
 #include "pros/colors.hpp"
 #include "lemlib/pid.hpp"
 
 class Lady_Brown {
     public:
-        Lady_Brown(pros::Motor* motor, pros::Rotation* rotation, lemlib::PID* pid);
+        Lady_Brown(pros::Motor* motor, pros::adi::Potentiometer* rotation, lemlib::PID* pid);
 
         struct position {
             double angle;
@@ -24,5 +24,5 @@ class Lady_Brown {
     private:
     pros::Motor* motor;
     lemlib::PID* pid;
-    pros::Rotation* rotation;
+    pros::adi::Potentiometer* rotation;
 };

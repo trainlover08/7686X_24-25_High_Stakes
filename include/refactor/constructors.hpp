@@ -20,7 +20,7 @@ pros::adi::Pneumatics mogo_mech_piston(mogo_mech_port, true);
 pros::adi::Pneumatics doinker_piston(doinker_port, false);
 
 pros::Rotation vertical_tracking_wheel(vertical_odom_pod_rotation_sensor);
-pros::Rotation lady_brown_rotation(lady_brown_rotation_sensor);
+pros::adi::Potentiometer lady_brown_rotation(lady_brown_pot);
 
 pros::IMU imu(imu_port);
 
@@ -68,10 +68,22 @@ lemlib::ExpoDriveCurve steer_curve(
 
 lemlib::Mod_Chassis chassis(drivetrain, lateral_controller, angular_controller, sensors, &throttle_curve, &steer_curve);
 
-lemlib::PID lady_brown_controller (
-    lb_p_gain,                      //kP
-    lb_i_gain,                      //kI
-    lb_d_gain                       //kD
+lemlib::PID lady_brown_ready_controller (
+    lb_ready_p_gain,                      //kP
+    lb_ready_i_gain,                      //kI
+    lb_ready_d_gain                       //kD
+);
+
+lemlib::PID lady_brown_score_controller (
+    lb_score_p_gain,
+    lb_score_i_gain,
+    lb_score_d_gain
+);
+
+lemlib::PID lady_brown_return_controller (
+    lb_return_p_gain,
+    lb_return_i_gain,
+    lb_return_d_gain
 );
 
 rd::Console console;
@@ -88,7 +100,7 @@ Mapable_Controller::Button_Combo lb_down_button (main_controller.controller, {la
 Mapable_Controller::Button_Combo lb_que_button (main_controller.controller, {lady_brown_que_button});
 
 Intake intake(&lower_intake_motor, &upper_intake_motor);
-Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_controller);
-Lady_Brown::position hold({.angle=lady_brown_ready_macro});
-Lady_Brown::position load({.angle=lady_brown_load_macro});
-Lady_Brown::position score({.angle=lady_brown_score_macro});
+Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_return_controller);
+Lady_Brown::position hold({.angle=lady_brown_ready_macro, .pid=&lady_brown_return_controller});
+Lady_Brown::position load({.angle=lady_brown_load_macro, .pid=&lady_brown_ready_controller});
+Lady_Brown::position score({.angle=lady_brown_score_macro, .pid=&lady_brown_score_controller});

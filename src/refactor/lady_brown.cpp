@@ -1,19 +1,19 @@
 #include "refactor/lady_brown.hpp"
 
-Lady_Brown::Lady_Brown(pros::Motor* motor, pros::Rotation* rotation, lemlib::PID* pid) {
+Lady_Brown::Lady_Brown(pros::Motor* motor, pros::adi::Potentiometer* rotation, lemlib::PID* pid) {
     this->motor = motor;
     this->rotation = rotation;
     this->pid = pid;
 }
 
 void Lady_Brown::move_to_position (const Lady_Brown::position& pos) {
-    double error = pos.angle - this->rotation->get_angle();
+    double error = pos.angle - this->rotation->get_value();
     double output = this->pid->update(error);
     this->motor->move(output);
 }
 
 void Lady_Brown::move_to_position (const Lady_Brown::position* pos) {
-    double error = pos->angle - this->rotation->get_angle();
+    double error = pos->angle - this->rotation->get_value();
     double output = this->pid->update(error);
     this->motor->move(output);
 }

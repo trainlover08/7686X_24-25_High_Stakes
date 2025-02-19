@@ -8,8 +8,8 @@ namespace lemlib {
 
     void Mod_Chassis::moveRelative (float distance, unsigned int timeout, bool reverse, bool async) {
         Pose pose = this->getPose();
-        float x = cos(pose.theta) * distance + pose.x;
-        float y = sin(pose.theta) * distance + pose.y;
+        float x = sin(pose.theta) * distance + pose.x;
+        float y = cos(pose.theta) * distance + pose.y;
         this->moveToPose(x, y, pose.theta, timeout, {.forwards=!reverse}, async);
     }
 
