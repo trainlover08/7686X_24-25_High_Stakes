@@ -11,6 +11,14 @@ MCL::MCL (lemlib::Pose* pose, std::vector<sensor> sensors) {
     mc = new Filter::Monte_Carlo (robot);
 }
 
+MCL::~MCL() {
+    delete mc;
+    delete robot;
+    for (auto s : sensor_vec) {
+        delete s;
+    }
+}
+
 lemlib::Pose* MCL::update () {
     return mc->cycle();
 }
@@ -91,8 +99,8 @@ constexpr std::array<double, 2> helper::find_intercept (double global_theta, dou
     return { x + t * cos_theta, y + t * sin_theta };
 }
 
-constexpr double helper::calculate_distance (std::array<std::array<double, 2>, 2> arr) {
-    return cxprmath::hypot(cxprmath::abs(arr[0][0] - arr[1][0]), cxprmath::abs(arr[0][1] - arr[1][1]));
+constexpr double helper::calculate_distance(std::array<std::array<double, 2>, 2> arr) {
+    return cxprmath::hypot(arr[0][0] - arr[1][0], arr[0][1] - arr[1][1]);
 }
 
 constexpr double calculate_loss (double o, double e, int raw) {
@@ -174,13 +182,13 @@ constexpr std::array<Filter::Particle*, 100> Filter::Monte_Carlo::breed (std::ar
 
 std::array<Filter::Particle*, 100> Filter::Monte_Carlo::mutate (std::array<Filter::Particle*, 100> p_arr) {
     double SCALE_FACTOR = 5.0;
+    std::random_device rd;
+    std::mt19937 gen(rd());
     for (int i = 0; i < 100; ++i) {
         Particle* p = p_arr[i];
         double grad_x = p->grad()[0];
         double grad_y = p->grad()[1];
         double grad_theta = p->grad()[2];
-        std::random_device rd;
-        std::mt19937 gen(rd());
         std::normal_distribution<> x_distribution(-SCALE_FACTOR * grad_x, SCALE_FACTOR * grad_x);
         std::normal_distribution<> y_distribution(-SCALE_FACTOR * grad_y, SCALE_FACTOR * grad_y);
         std::normal_distribution<> angle_distribution(-SCALE_FACTOR * grad_theta, SCALE_FACTOR * grad_theta);
@@ -191,34 +199,38 @@ std::array<Filter::Particle*, 100> Filter::Monte_Carlo::mutate (std::array<Filte
     return p_arr;
 }
 
-constexpr void Filter::Particle::update_for_odom (lemlib::Pose* pose) {
-    Filter::Particle::last_pose = pose;
-    My_Pose d_pose (pose->x - last_pose->x, pose->y - last_pose->y, pose->theta - last_pose->theta);
-    double dx = d_pose.x;
-    double dy = d_pose.y;
-    double dtheta = cxprmath::clean_angle_degrees(d_pose.theta, true);
-    Filter::Particle::x_1 += dx;
-    Filter::Particle::y_1 += dy;
-    Filter::Particle::theta_1 = cxprmath::clean_angle_degrees(Filter::Particle::theta_1 + dtheta, true);
-    Filter::Particle::x_2 += dx;
-    Filter::Particle::y_2 += dy;
-    Filter::Particle::theta_2 = cxprmath::clean_angle_degrees(Filter::Particle::theta_2 + dtheta, true);
+constexpr void Filter::Particle::update_for_odom(lemlib::Pose* new_pose) {
+    if (last_pose) {
+        double dx = new_pose->x - last_pose->x;
+        double dy = new_pose->y - last_pose->y;
+        double dtheta = cxprmath::clean_angle_degrees(new_pose->theta - last_pose->theta, true);
+        this->x_1 += dx;
+        this->y_1 += dy;
+        this->theta_1 = cxprmath::clean_angle_degrees(this->theta_1 + dtheta, true);
+        this->x_2 += dx;
+        this->y_2 += dy;
+        this->theta_2 = cxprmath::clean_angle_degrees(this->theta_2 + dtheta, true);
+    }
+    last_pose = new_pose;
 }
 
-constexpr lemlib::Pose* Filter::Monte_Carlo::weighted_average (std::array<Particle*, 20> p_arr) {
+constexpr lemlib::Pose* Filter::Monte_Carlo::weighted_average(std::array<Particle*, 20> p_arr) {
     double total_weight = 0.0;
     double x_sum = 0.0;
     double y_sum = 0.0;
     double sin_sum = 0.0;
     double cos_sum = 0.0;
     for (int i = 0; i < 20; ++i) {
-        total_weight += p_arr[i]->fitness;
-        x_sum += p_arr[i]->fitness * p_arr[i]->x_1;
-        y_sum += p_arr[i]->fitness * p_arr[i]->y_1;
-        sin_sum += p_arr[i]->fitness * cxprmath::sin(p_arr[i]->theta_1);
-        cos_sum += p_arr[i]->fitness * cxprmath::cos(p_arr[i]->theta_1);
+        double weight = (p_arr[i]->fitness > 0) ? (1.0 / p_arr[i]->fitness) : 1000.0;
+        total_weight += weight;
+        x_sum += weight * p_arr[i]->x_1;
+        y_sum += weight * p_arr[i]->y_1;
+        sin_sum += weight * cxprmath::sin(p_arr[i]->theta_1);
+        cos_sum += weight * cxprmath::cos(p_arr[i]->theta_1);
     }
-    lemlib::Pose (x_sum / total_weight, y_sum / total_weight, cxprmath::rad_to_degrees(cxprmath::atan2(sin_sum, cos_sum)));
+    pose->x = x_sum / total_weight;
+    pose->y = y_sum / total_weight;
+    pose->theta = cxprmath::rad_to_degrees(cxprmath::atan2(sin_sum, cos_sum));
     return pose;
 }
 
@@ -243,3 +255,10 @@ Filter::Monte_Carlo::Monte_Carlo(Robot* robot) {
     }
     Monte_Carlo::mutate(population);
 }
+
+Filter::Monte_Carlo::~Monte_Carlo() {
+    for (int i = 0; i < 100; ++i) {
+        delete population[i];
+    }
+}
+
