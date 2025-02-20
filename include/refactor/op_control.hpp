@@ -24,7 +24,14 @@ void intake_task () {
 }
 
 void ui_task () {
-    //selector.focus();
+    std::string x_str = "X: " + std::to_string(chassis.getPose().x);
+    std::string y_str = "Y: " + std::to_string(chassis.getPose().y);
+    std::string t_str = "Theta: " + std::to_string(chassis.getPose().theta);
+    console.clear();
+    console.println(x_str);
+    console.println(y_str);
+    console.println(t_str);
+    pros::delay(50);
 }
 
 void drive_task () {
