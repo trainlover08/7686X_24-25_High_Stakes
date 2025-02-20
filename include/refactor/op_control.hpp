@@ -72,9 +72,29 @@ void misc_task () {
 
 void lady_brown_intake_task () {
     Lady_Brown::position* pose = &hold;
+    double v2 = 0.0;
+    unsigned int que = 0;
     while (1) {
+        mut=0;
+        double v1 = v2;
+        v2 = upper_intake_motor.get_velocity();
+        if (upper_intake_motor.get_torque() > 0.5 * upper_intake_motor.get_max_torque()) {
+            if (upper_intake_motor.get_max_velocity() * 0.1 > upper_intake_motor.get_velocity()) {
+                if (((v2 - v1 <= 0.0) && (pose.angle == hold.angle)) && (lady_brown.is_stopped())) {
+                    while (!lb_down_button.is_pressing()) pros::delay(10);
+                    pose = &score;
+                    while (lb_down_button.is_pressing()) pros::delay(10);
+                }
+            }
+        }
+        mut=1;
+        que += lb_que_button.pressing();
+        while (lb_que_button.pressing()) pros::delay(10);
+        if (que > 0) {
+            if (pose.angle == hold.angle) pose = &load;
+        }
         if (lb_down_button.is_pressing()) {
-            pose = pose->angle == hold.angle ? pose = &load : pose->angle == load.angle ? pose = &score :  pose = &hold;
+            pose = &hold;
             while (lb_down_button.is_pressing()) pros::delay(10);
         }
         lady_brown.move_to_position(pose);
