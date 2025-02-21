@@ -1,0 +1,2470 @@
+\important{Ian's AI Code (Updated: October 29, 2024)}
+\chapterauthor{author: Ian Smith \\ formatted by: Caleb Bachmeier}
+\info{Ian Smith}{Ian's AI Code}{October 29, 2024}
+\label{Appendix A}
+\section*{AI Folder - AI Versions}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+// (include/ai_folder/ai_versions/ai_v0.2/neural_network.cpp)
+ 
+ 
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <cassert>
+#include <algorithm>
+#include <deque>
+#include <tuple>
+#include <fstream>
+#include <stdexcept>
+ 
+using namespace std;
+ 
+class ReplayBuffer {
+private:
+    struct Transition {
+        std::vector<double> state;
+        int action;
+        double reward;
+        std::vector<double> nextState;
+        bool done;
+    };
+ 
+    std::deque<Transition> buffer;
+    size_t capacity;
+    std::mt19937 rng;
+ 
+public:
+    ReplayBuffer(size_t capacity) : capacity(capacity) {
+        std::random_device rd;
+        rng = std::mt19937(rd());
+    }
+ 
+    void storeTransition(const std::vector<double>& state, int action, double reward, const std::vector<double>& nextState, bool done) {
+        if (buffer.size() >= capacity) {
+            buffer.pop_front();
+        }
+        buffer.push_back({state, action, reward, nextState, done});
+    }
+ 
+    std::tuple<std::vector<std::vector<double>>, std::vector<int>, std::vector<double>, std::vector<std::vector<double>>, std::vector<bool>>
+    sampleBatch(size_t batchSize) {
+        std::vector<std::vector<double>> states(batchSize);
+        std::vector<int> actions(batchSize);
+        std::vector<double> rewards(batchSize);
+        std::vector<std::vector<double>> nextStates(batchSize);
+        std::vector<bool> dones(batchSize);
+ 
+        std::uniform_int_distribution<size_t> dist(0, buffer.size() - 1);
+ 
+        for (size_t i = 0; i < batchSize; ++i) {
+            size_t idx = dist(rng);
+            const Transition& transition = buffer[idx];
+ 
+            states[i] = transition.state;
+            actions[i] = transition.action;
+            rewards[i] = transition.reward;
+            nextStates[i] = transition.nextState;
+            dones[i] = transition.done;
+        }
+ 
+        return {states, actions, rewards, nextStates, dones};
+    }
+ 
+    bool isReady(size_t batchSize) const {
+        return buffer.size() >= batchSize;
+    }
+};
+ 
+class AdamOptimizer {
+public:
+    double lr;
+    double beta1;
+    double beta2;
+    double epsilon;
+    int t;
+ 
+    AdamOptimizer(double learning_rate, double beta1, double beta2, double epsilon)
+        : lr(learning_rate), beta1(beta1), beta2(beta2), epsilon(epsilon), t(0) {}
+ 
+    void update(vector<vector<double>>& weights, vector<vector<double>>& m, vector<vector<double>>& v, const vector<vector<double>>& grads) {
+        t++;
+        for (size_t i = 0; i < weights.size(); ++i) {
+            for (size_t j = 0; j < weights[0].size(); ++j) {
+                m[i][j] = beta1 * m[i][j] + (1 - beta1) * grads[i][j];
+                v[i][j] = beta2 * v[i][j] + (1 - beta2) * grads[i][j] * grads[i][j];
+                double m_hat = m[i][j] / (1 - pow(beta1, t));
+                double v_hat = v[i][j] / (1 - pow(beta2, t));
+                weights[i][j] -= lr * m_hat / (sqrt(v_hat) + epsilon);
+            }
+        }
+    }
+ 
+    void update(vector<double>& biases, vector<double>& m, vector<double>& v, const vector<double>& grads) {
+        t++;
+        for (size_t i = 0; i < biases.size(); ++i) {
+            m[i] = beta1 * m[i] + (1 - beta1) * grads[i];
+            v[i] = beta2 * v[i] + (1 - beta2) * grads[i] * grads[i];
+            double m_hat = m[i] / (1 - pow(beta1, t));
+            double v_hat = v[i] / (1 - pow(beta2, t));
+            biases[i] -= lr * m_hat / (sqrt(v_hat) + epsilon);
+        }
+    }
+};
+ 
+class AdamWOptimizer {
+public:
+    double lr;         // Learning rate
+    double beta1;      // Exponential decay rate for the first moment estimates
+    double beta2;      // Exponential decay rate for the second moment estimates
+    double epsilon;    // Small constant to prevent division by zero
+    double weightDecay; // Weight decay coefficient (L2 regularization)
+    int t;             // Time step
+ 
+    AdamWOptimizer(double learning_rate, double beta1, double beta2, double epsilon, double weightDecay)
+        : lr(learning_rate), beta1(beta1), beta2(beta2), epsilon(epsilon), weightDecay(weightDecay), t(0) {}
+ 
+    void update(vector<vector<double>>& weights, vector<vector<double>>& m, vector<vector<double>>& v, const vector<vector<double>>& grads) {
+        t++;
+        for (size_t i = 0; i < weights.size(); ++i) {
+            for (size_t j = 0; j < weights[0].size(); ++j) {
+                // Update biased first moment estimate
+                m[i][j] = beta1 * m[i][j] + (1 - beta1) * grads[i][j];
+ 
+                // Update biased second raw moment estimate
+                v[i][j] = beta2 * v[i][j] + (1 - beta2) * grads[i][j] * grads[i][j];
+ 
+                // Compute bias-corrected first moment estimate
+                double m_hat = m[i][j] / (1 - pow(beta1, t));
+ 
+                // Compute bias-corrected second raw moment estimate
+                double v_hat = v[i][j] / (1 - pow(beta2, t));
+ 
+                // Apply weight decay
+                weights[i][j] -= lr * weightDecay * weights[i][j];
+ 
+                // Update weights with AdamW rule
+                weights[i][j] -= lr * m_hat / (sqrt(v_hat) + epsilon);
+            }
+        }
+    }
+ 
+    void update(vector<double>& biases, vector<double>& m, vector<double>& v, const vector<double>& grads) {
+        t++;
+        for (size_t i = 0; i < biases.size(); ++i) {
+            // Update biased first moment estimate
+            m[i] = beta1 * m[i] + (1 - beta1) * grads[i];
+ 
+            // Update biased second raw moment estimate
+            v[i] = beta2 * v[i] + (1 - beta2) * grads[i] * grads[i];
+ 
+            // Compute bias-corrected first moment estimate
+            double m_hat = m[i] / (1 - pow(beta1, t));
+ 
+            // Compute bias-corrected second raw moment estimate
+            double v_hat = v[i] / (1 - pow(beta2, t));
+ 
+            // Apply weight decay (biases typically don't have weight decay, but adding for completeness)
+            biases[i] -= lr * weightDecay * biases[i];
+ 
+            // Update biases with AdamW rule
+            biases[i] -= lr * m_hat / (sqrt(v_hat) + epsilon);
+        }
+    }
+ 
+    // Serialize optimizer state to a file
+    void save(ofstream& outFile) const {
+        outFile << lr << " " << beta1 << " " << beta2 << " " << epsilon << " " << weightDecay << " " << t << "\n";
+    }
+ 
+    // Deserialize optimizer state from a file
+    void load(ifstream& inFile) {
+        inFile >> lr >> beta1 >> beta2 >> epsilon >> weightDecay >> t;
+    }
+};
+ 
+ 
+class Layer {
+public:
+    vector<vector<double>> weights;
+    vector<double> biases;
+    vector<vector<double>> grads_weights;
+    vector<double> grads_biases;
+    vector<vector<double>> m_weights;
+    vector<vector<double>> v_weights;
+    vector<double> m_biases;
+    vector<double> v_biases;
+    vector<vector<double>> cache_inputs;
+    vector<vector<double>> cache_z;
+    string activation;
+    AdamWOptimizer optimizer;
+ 
+    Layer(int input_dim, int output_dim, const string& activation, AdamWOptimizer optimizer)
+        : optimizer(optimizer) {
+        random_device rd;
+        mt19937 gen(rd());
+        normal_distribution<> d(0, 0.01);
+        normal_distribution<> dist(0, std::sqrt(2.0 / input_dim));
+ 
+        this->activation = activation;
+        weights.resize(input_dim, vector<double>(output_dim));
+        grads_weights.resize(input_dim, vector<double>(output_dim, 0.0));
+        m_weights.resize(input_dim, vector<double>(output_dim, 0.0));
+        v_weights.resize(input_dim, vector<double>(output_dim, 0.0));
+        biases.resize(output_dim, 0.0);
+        grads_biases.resize(output_dim, 0.0);
+        m_biases.resize(output_dim, 0.0);
+        v_biases.resize(output_dim, 0.0);
+ 
+        for (int i = 0; i < input_dim; ++i) {
+            for (int j = 0; j < output_dim; ++j) {
+                if(activation != "relu"){
+                    weights[i][j] = d(gen);
+                } else {
+                    weights[i][j] = dist(gen);
+                }
+            }
+        }
+    }
+ 
+    vector<vector<double>> forward(const vector<vector<double>>& inputs) {
+        int batch_size = inputs.size();
+        int output_dim = weights[0].size();
+ 
+        vector<vector<double>> z(batch_size, vector<double>(output_dim));
+        vector<vector<double>> a(batch_size, vector<double>(output_dim));
+ 
+        for (int i = 0; i < batch_size; ++i) {
+            for (int j = 0; j < output_dim; ++j) {
+                for (int k = 0; k < inputs[0].size(); ++k) {
+                    z[i][j] += inputs[i][k] * weights[k][j];
+                }
+                z[i][j] += biases[j];
+                a[i][j] = (activation == "relu") ? max(0.0, z[i][j]) : z[i][j];
+            }
+        }
+ 
+        cache_inputs = inputs;
+        cache_z = z;
+        return a;
+    }
+ 
+    vector<vector<double>> backward(const vector<vector<double>>& grad_output, double& grad_clip) {
+        int batch_size = cache_inputs.size();
+        int input_dim = cache_inputs[0].size();
+        int output_dim = weights[0].size();
+ 
+        vector<vector<double>> grad_inputs(batch_size, vector<double>(input_dim));
+ 
+        for (int i = 0; i < batch_size; ++i) {
+            for (int j = 0; j < output_dim; ++j) {
+                double grad_z = (activation == "relu") ? ((cache_z[i][j] > 0) ? grad_output[i][j] : 0.0) : grad_output[i][j];
+ 
+                if(grad_z < grad_clip) {
+                    grad_z = grad_clip;
+                } else if(grad_z > grad_clip) {
+                    grad_z = -grad_clip;
+                }
+ 
+                grads_biases[j] += grad_z;
+                for (int k = 0; k < input_dim; ++k) {
+                    grads_weights[k][j] += cache_inputs[i][k] * grad_z;
+                    grad_inputs[i][k] += weights[k][j] * grad_z;
+                }
+            }
+        }
+ 
+        return grad_inputs;
+    }
+ 
+    void update_weights() {
+        optimizer.update(weights, m_weights, v_weights, grads_weights);
+        optimizer.update(biases, m_biases, v_biases, grads_biases);
+    }
+ 
+    void reset_gradients() {
+        for (auto& row : grads_weights) {
+            fill(row.begin(), row.end(), 0.0);
+        }
+        fill(grads_biases.begin(), grads_biases.end(), 0.0);
+    }
+ 
+    // Serialize the layer's parameters to a file
+    void save(ofstream& outFile) const {
+        // Save weights
+        for (const auto& row : weights) {
+            for (double val : row) {
+                outFile << val << " ";
+            }
+        }
+        outFile << "\n";
+ 
+        // Save biases
+        for (double val : biases) {
+            outFile << val << " ";
+        }
+        outFile << "\n";
+ 
+        // Save optimizer states
+        optimizer.save(outFile);
+    }
+ 
+    // Deserialize the layer's parameters from a file
+    void load(ifstream& inFile) {
+        // Load weights
+        for (auto& row : weights) {
+            for (double& val : row) {
+                inFile >> val;
+            }
+        }
+ 
+        // Load biases
+        for (double& val : biases) {
+            inFile >> val;
+        }
+ 
+        // Load optimizer states
+        optimizer.load(inFile);
+    }
+ 
+private:
+    double He_initialzation(double input_size) {
+        // He initialization standard deviation
+        double stddev = std::sqrt(2.0 / input_size);
+ 
+        // Random number generator with normal distribution
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<double> dist(0.0, stddev);
+ 
+        return dist(gen);
+    }
+};
+ 
+class NeuralNetwork {
+public:
+    vector<Layer> layers;
+ 
+    void add_layer(const Layer& layer) {
+        layers.push_back(layer);
+    }
+ 
+    vector<vector<double>> forward(const vector<vector<double>>& inputs) {
+        vector<vector<double>> out = inputs;
+        for (auto& layer : layers) {
+            out = layer.forward(out);
+        }
+        return out;
+    }
+ 
+    void backward(const vector<vector<double>>& grad_output, double& grad_clip) {
+        vector<vector<double>> grad = grad_output;
+        for (auto it = layers.rbegin(); it != layers.rend(); ++it) {
+            grad = it->backward(grad, grad_clip);
+        }
+    }
+ 
+    void update_weights() {
+        for (auto& layer : layers) {
+            layer.update_weights();
+            layer.reset_gradients();
+        }
+    }
+ 
+    void softUpdate(NeuralNetwork& targetNetwork, double tau) {
+        assert(layers.size() == targetNetwork.layers.size());
+ 
+        // Update each layer in the target network
+        for (size_t i = 0; i < layers.size(); ++i) {
+            Layer& localLayer = layers[i];
+            Layer& targetLayer = targetNetwork.layers[i];
+ 
+            // Update weights and biases for each layer
+            for (size_t j = 0; j < localLayer.weights.size(); ++j) {
+                for(size_t k = 0; k < localLayer.weights[j].size(); ++k) {
+                    targetLayer.weights[j][k] = tau * localLayer.weights[j][k] + (1 - tau) * targetLayer.weights[j][k];
+                }
+            }
+ 
+            for (size_t j = 0; j < localLayer.biases.size(); ++j) {
+                targetLayer.biases[j] = tau * localLayer.biases[j] + (1 - tau) * targetLayer.biases[j];
+            }
+        }
+    }
+ 
+    // Serialize the entire neural network to a file
+    void save(const string& filename) const {
+        ofstream outFile(filename);
+        if (!outFile) {
+            cerr << "Error: Could not open file for writing: " << filename << endl;
+            return;
+        }
+ 
+        // Save the number of layers
+        outFile << layers.size() << "\n";
+ 
+        // Save each layer
+        for (const Layer& layer : layers) {
+            outFile << layer.weights.size() << " " << layer.weights[0].size() << " " << layer.activation << "\n";
+            layer.save(outFile);
+        }
+ 
+        outFile.close();
+    }
+ 
+    // Deserialize the entire neural network from a file
+    void load(const string& filename) {
+        ifstream inFile(filename);
+        if (!inFile) {
+            cerr << "Error: Could not open file for reading: " << filename << endl;
+            throw std::invalid_argument("Make sure that the file with that name exists. If it is the first generation, set the enumerated boolean 'E_NEW_NET' to 'true'");
+            return;
+        }
+ 
+        // Load the number of layers
+        size_t numLayers;
+        inFile >> numLayers;
+ 
+        layers.clear(); // Clear existing layers
+ 
+        // Load each layer
+        for (size_t i = 0; i < numLayers; ++i) {
+            int input_dim, output_dim;
+            string activation;
+            inFile >> input_dim >> output_dim >> activation;
+ 
+            AdamWOptimizer optimizer(0.001, 0.9, 0.999, 1e-8, 0.01); // Initialize optimizer with dummy values
+            Layer layer(input_dim, output_dim, activation, optimizer);
+            layer.load(inFile);
+            layers.push_back(layer);
+        }
+ 
+        inFile.close();
+    }
+};
+ 
+// Gradient ascent to update parameters
+void gradientAscent(std::vector<double>& params, const std::vector<double>& gradients, double learningRate) {
+    std::transform(params.begin(), params.end(), gradients.begin(), params.begin(), [learningRate](double p, double g) {
+        return p + learningRate * g;
+    });
+}
+ 
+// Compute the loss using negative log likelihood
+double computeLoss(const std::vector<double>& logProbs, const std::vector<double>& advantages) {
+    double loss = 0.0;
+    for (size_t i = 0; i < logProbs.size(); ++i) {
+        loss += logProbs[i] * advantages[i];
+    }
+    return loss;
+}
+ 
+// Compute the advantage using reward-to-go method
+double computeAdvantage(const std::vector<double>& rewards, int t, double gamma) {
+    double advantage = 0.0;
+    double discount = 1.0;
+    for (int i = t; i < rewards.size(); ++i) {
+        advantage += discount * rewards[i];
+        discount *= gamma;
+    }
+    return advantage;
+}
+ 
+// Function to safely compute log values with clipping
+inline float safeLog(float x, float min_value = 1e-6f) {
+    // Clip the input x to avoid log of zero or negative numbers
+    float clipped_x = std::max(x, min_value);
+    return std::log(clipped_x);
+}
+\end{minted}
+
+\section*{Common}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+// (common.cpp)
+
+
+#include "include.cpp"
+
+// namespace wrapper for common functions
+namespace cmn {
+    class my_controller {
+    public:
+        // Make the class for the mappable controller layout. 
+        // most of this is initialization and default constructor type of things
+        pros::controller_analog_e_t throttle_axis = pros::E_CONTROLLER_ANALOG_LEFT_Y;
+        pros::controller_analog_e_t steer_axis = pros::E_CONTROLLER_ANALOG_RIGHT_X;
+
+        pros::controller_digital_e_t arm_pneumatic_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t wrist_pneumatic_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t intake_pneumatic_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t mogo_pneumatic_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t switch_controller_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t intake_motor_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t extake_motor_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t sort_color_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t load_arm_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t hold_ring_or_constant_scoring_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t score_held_ring_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t shift_button = pros::E_CONTROLLER_DIGITAL_X;
+        pros::controller_digital_e_t chopper_mech = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t screen_index_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::controller_digital_e_t reverse = pros::E_CONTROLLER_DIGITAL_DOWN;
+        pros::Controller *controller;
+        bool is_master_controller = false;
+        int current_slave_screen_index = 0;
+    };
+
+    class PID {
+        // a universal class for different PID controllers
+        public:
+            double kP = 0.0f;
+            double kD = 0.0f;
+            double kI = 0.0f;
+            double target = 0.0f;
+            double position = 0.0f;
+        private:
+            double error;
+            double x_1;
+            double x_2;
+            double integral;
+        public:
+            double run() {
+                error = target - position;
+                x_1 = x_2;
+                x_2 = error;
+                integral += error;
+                return ((integral * kI) + (error * kP) + ((x_2 - x_1) * kD));
+            }
+    };
+
+    class GUI {
+        // A class for printing and interaction with the brain
+    public:
+        int current_view = 0;
+        std::vector<pros::Motor> motor_list;
+        int selected_auton = 0;
+        std::vector<std::string> auton_name_list;
+
+        void render () {
+            clear_screen();
+            switch (current_view){
+                case 0:
+                    auton_select_screen();
+                    break;
+                case 1:
+                    print_motor_temprature_screen();
+                    break;
+                case 2:
+                    print_motor_detail_screen();
+                    break;
+                case 3:
+                    current_view = 0;
+                    break;
+                default:
+                    break;
+            }
+            press();
+        }
+
+    private:
+        pros::Color get_temp(pros::Motor& motor) {
+            if(motor.get_temperature() < 55) {
+                return pros::Color::green;
+            }else if(motor.get_temperature() >= 55 && motor.get_temperature() < 60){
+                return pros::Color::yellow;
+            }else if(motor.get_temperature() >= 60 && motor.get_temperature() < 65){
+                return pros::Color::red;
+            } else if (motor.get_temperature() >= 65) {
+                return pros::Color::dark_red;
+            } else {
+                return pros::Color::gray;
+            }
+        }
+
+        // printing for all of the different screens
+
+        // some of these use brute force (should be redone)
+        // others do it algorithmically (the good ones that things should be redone to)
+        void print_motor_temprature_screen() {
+            pros::screen::set_pen(pros::Color::white_smoke);
+            pros::screen::draw_line(360, 0, 360, 240);
+            pros::screen::draw_line(360, 120, 480, 120);
+
+            pros::screen::draw_circle(420, 60, 46);
+            pros::screen::draw_circle(420, 180, 46);
+            pros::screen::draw_circle(300, 60, 46);
+            pros::screen::draw_circle(180, 60, 46);
+            pros::screen::draw_circle(60, 60, 46);
+            pros::screen::draw_circle(60, 180, 46);
+            pros::screen::draw_circle(180, 180, 46);
+            pros::screen::draw_circle(300, 180, 46);
+            pros::screen::set_pen(get_temp(motor_list[6]));
+            pros::screen::fill_circle(420, 60, 45);
+            pros::screen::set_pen(get_temp(motor_list[7]));
+            pros::screen::fill_circle(420, 180, 45);
+            pros::screen::set_pen(get_temp(motor_list[2]));
+            pros::screen::fill_circle(300, 60, 45);
+            pros::screen::set_pen(get_temp(motor_list[5]));
+            pros::screen::fill_circle(300, 180, 45);
+            pros::screen::set_pen(get_temp(motor_list[1]));
+            pros::screen::fill_circle(180, 60, 45);
+            pros::screen::set_pen(get_temp(motor_list[4]));
+            pros::screen::fill_circle(180, 180, 45);
+            pros::screen::set_pen(get_temp(motor_list[0]));
+            pros::screen::fill_circle(60, 60, 45);
+            pros::screen::set_pen(get_temp(motor_list[3]));
+            pros::screen::fill_circle(60, 180, 45);
+
+            pros::screen::set_eraser(pros::Color::black);
+            pros::screen::set_pen(pros::Color::white_smoke);
+            pros::screen::print(pros::E_TEXT_SMALL, 17, 55, "L M 1 (%i)", motor_list[0].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 137, 55, "L M 2 (%i)", motor_list[1].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 257, 55, "L M 3 (%i)", motor_list[2].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 17, 175, "R M 1 (%i)", motor_list[3].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 137, 175, "R M 2 (%i)", motor_list[4].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 257, 175, "R M 3 (%i)", motor_list[5].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 377, 55, "Lower(%i)", motor_list[6].get_port());
+            pros::screen::print(pros::E_TEXT_SMALL, 377, 175, "Upper(%i)", motor_list[7].get_port());
+        }
+
+        void clear_screen() {
+            pros::screen::set_eraser(pros::Color::black);
+            pros::screen::erase();
+            pros::screen::erase_rect(0,0,480,240);
+        }
+
+        void print_motor_detail_screen () {
+            pros::screen::set_pen(pros::Color::white_smoke);
+            pros::screen::draw_line(360, 0, 360, 240);
+            pros::screen::draw_line(240, 0, 240, 240);
+            pros::screen::draw_line(120, 0, 120, 240);
+            pros::screen::draw_line(0, 120, 480, 120);
+            std::vector<std::string> stat_type {"Velocity ", "Temp ", "Torque ", "Power "};
+            std::vector<std::string> unit {"RPM", "C", "nm", "W"};
+
+            for(int i = 0; i < 4; ++i){
+                for(int  j = 0; j < 2; ++j){
+                    int velocity = motor_list[i + j].get_actual_velocity();
+                    int temprature = motor_list[i + j].get_temperature();
+                    int torque = std::roundf(motor_list[i + j].get_torque());
+                    int power = motor_list[i + j].get_power();
+                    std::vector<std::string> stat {std::to_string(velocity), std::to_string(temprature), std::to_string(torque), std::to_string(power)};
+                    for(int k = 1; k <= 4; ++k) {
+                        pros::screen::print(pros::E_TEXT_SMALL, (120 * i) + (8), (j * 120) + (k * 20), "%s%s%s", stat_type[k-1], stat[k-1], unit[k-1]);
+                    }
+                }
+            }
+        }
+
+        std::vector<int> is_selected() {
+            int x_1, y_1, x_2, y_2;
+            if((selected_auton % 2) == 0) {
+                y_1 = 10;
+                y_2 = 95;
+            } else {
+                y_1 = 115;
+                y_2 = 200;
+            }
+            x_1 = (((selected_auton - (selected_auton % 2)) / 2) * 120) + 10;
+            x_2 = x_1 + 100;
+
+            return {x_1, y_1, x_2, y_2};
+        }
+
+        void auton_select_screen() {
+            clear_screen();
+            
+            pros::screen::set_pen(pros::Color::purple);
+            pros::screen::fill_rect(is_selected()[0], is_selected()[1], is_selected()[2], is_selected()[3]);
+            
+            pros::screen::set_pen(pros::Color::light_blue);
+            for(int i = 0; i < 4; ++i) {
+                for(int j = 0; j < 2; ++j) {
+                    pros::screen::fill_rect(((i * 120) + 20), ((j * 105) + 20), (((i + 1) * 120) - 20), (((j + 1) * 105) - 20));
+                }
+            }
+
+            pros::screen::set_pen(pros::Color::white_smoke);
+            pros::screen::draw_line(0, 211, 480, 211);
+            pros::screen::print(pros::E_TEXT_MEDIUM_CENTER, 240, 225, "Next Display ->");
+
+            for(int k = 0; k < 4; ++k) {
+                for(int a = 0; a < 2; ++a) {
+                    // this commented line below was causing a runtime error. I decided to come back to it later because it is not as critical as other things that needed to get done
+
+                    //pros::screen::print(pros::E_TEXT_SMALL, ((k * 120) + 10), ((a * 120) + 55), "%s", auton_name_list[(k * 2) + a]);
+                }
+            }
+        }
+
+        void press() {
+            // a function that looks to see if the screen is being used as a touch screen based on different conditions
+
+            pros::screen_touch_status_s_t status = pros::screen::touch_status();
+            if(status.touch_status == pros::E_TOUCH_PRESSED){
+                if(!(current_view == 0)) {
+                    ++current_view;
+                } else if(status.y > 215) {
+                    ++current_view;
+                } else {
+                    selected_auton = (std::floor(status.x / 120) * 2) + (std::floor(status.y / 105));
+                }
+                if(current_view == 3) {
+                    current_view = 0;
+                }
+            }
+        }
+    };
+
+    class Tube {
+        // A default object as a constructor for the pneumatics system
+    public:
+        double length = 0; //in inches
+        double volume;
+        double init() {
+            volume = (std::pow((1.0f / 25.4), 2) * M_PI) * length; //in cubic inches
+            return volume;
+        }
+    };
+
+    class Piston {
+        // again, another constructor class
+    public:
+        double stroke = 0; //in mm
+        double volume;
+        double init() {
+            volume = (std::pow((5.0f / 25.4), 2) * M_PI) * (stroke / 25.4); //in cubic inches
+            return volume;
+        }
+    };
+
+    class Air_Tank {
+        // yet another constructor object
+    public:
+        std::string type; // default new type
+        double capacity;
+        
+        Air_Tank(std::string tank_type = "new") : type(tank_type) {
+            if (type == "legacy") {
+                capacity = LEGACY_CAPACITY;
+            } else {
+                capacity = NEW_CAPACITY;
+            }
+        }
+    private:
+        const double LEGACY_CAPACITY = 5.0; // not correct. need to find the exact value yet
+        const double NEW_CAPACITY = 9.154;
+    };
+
+    class Pneumatics_Component{
+    public:
+        std::vector<double> volumes;
+        double total_component_volume; //in cubic inches
+
+        void compute_system_volume () {
+            total_component_volume = 0;
+            for (int i = 0; i < volumes.size(); i++) {
+                total_component_volume += volumes[i];
+            }
+        }
+    };
+
+    class Pneumatics_System {
+        // the true pneumatics class, the one that gets used other than an initializer
+    public:
+        double air_pressure = 100.0f;
+        double true_air_pressure = 110.0f;
+        double system_volume;
+
+        void system_init(std::vector<Pneumatics_Component> comp) {
+            system_volume = 0;
+            for (int i = 0; i < comp.size(); ++i) {
+                system_volume += comp[i].total_component_volume;
+            }
+        }
+
+        void cycled(Pneumatics_Component comp) {
+            double new_volume = system_volume + comp.total_component_volume;
+            true_air_pressure = true_air_pressure * (system_volume / new_volume);
+            if (true_air_pressure < 100) {
+                air_pressure = true_air_pressure;
+            } else {
+                air_pressure = 100;
+            }
+        }
+    };
+
+    // a controller lcd class for spontainious match stats
+    class Controller_Print {
+    public:
+
+        std::string my_time_to_string(unsigned int time) {
+        unsigned int minutes = time / 60;
+        unsigned int seconds = time % 60;
+        std::string minutes_str = std::to_string(minutes);
+        std::string seconds_str = std::to_string(seconds);
+        if (minutes < 10) {
+            minutes_str = "0" + minutes_str;
+        }
+        if (seconds < 10) {
+            seconds_str = "0" + seconds_str;
+        }
+        return minutes_str + ":" + seconds_str;
+    }
+    
+        std::vector<pros::Motor> cont_drivetrain;
+        unsigned int time;
+        Pneumatics_System p_sys;
+        float pressure_derivative, battery_derivative, temp_derivative;
+
+        int get_pressure (Pneumatics_System p_sys) {
+            return std::round(p_sys.true_air_pressure);
+        }
+
+        void init (my_controller& master, my_controller& slave) {
+            master.controller->clear();
+            slave.controller->clear();
+            pd_1 = p_sys.true_air_pressure;
+            bd_1 = pros::battery::get_capacity();
+            td_1 = get_current_temp();
+        }
+
+        void print_master (my_controller master) {
+            // this commented line was found to be problematic because of refresh time
+
+            //master.controller->clear();
+            master.controller->print(1, 8, "%s", my_time_to_string(time / 1000));
+        }
+
+        void print_slave (my_controller slave) {
+            // this function is for printing to the slave controller. It shows the current stat and the derivitave for each stat
+
+            //slave.controller->clear();
+            pd_2 = p_sys.true_air_pressure;
+            bd_2 = pros::battery::get_capacity();
+            pressure_derivative = (pd_2 - pd_1) / (time / 1000);
+            battery_derivative = ((bd_2 - bd_1) / (time / 1000)) * 100;
+            double current_temp = get_current_temp();
+            td_2 = current_temp;
+            temp_derivative = (td_2 - td_1) / (time / 1000);
+            if(slave.controller->get_digital(slave.screen_index_button)) {
+                slave.current_slave_screen_index++;
+            }
+            switch(slave.current_slave_screen_index) {
+                case 0:
+                    slave.controller->print(0, 5, "%i PSI", std::round(p_sys.true_air_pressure));
+                    slave.controller->print(1, 0, "%f/s", pressure_derivative);
+                    slave.controller->print(2, 5, "%s", my_time_to_string(-(pd_1 / 1000)/ pressure_derivative));
+                    break;
+                case 1:
+                    slave.controller->print(0, 6, "%f%", pros::battery::get_capacity() * 100);
+                    slave.controller->print(1, 0, "%f/s", battery_derivative);
+                    slave.controller->print(2, 5, "%s", my_time_to_string(-((bd_1 * 100) / 1000) / battery_derivative));
+                    break;
+                case 2:
+                    slave.controller->print(0, 6, "%iC", std::round(current_temp));
+                    slave.controller->print(1, 0, "%f/s", temp_derivative);
+                    slave.controller->print(2, 5, "%s", my_time_to_string(-(td_1 / 1000) / temp_derivative));
+                    break;
+                case 3:
+                    slave.controller->print(1, 5, "%s", my_time_to_string(time / 1000));
+                    break;
+                case 4:
+                    slave.current_slave_screen_index = 0;
+                    break;
+                default:
+                    break;
+            }
+        }
+    private:
+        double pd_1, pd_2, bd_1, bd_2, td_1, td_2;
+
+        double get_current_temp () {
+            return ((cont_drivetrain[0].get_temperature()) + (cont_drivetrain[1].get_temperature()) + (cont_drivetrain[2].get_temperature()) + (cont_drivetrain[3].get_temperature(), cont_drivetrain[4].get_temperature()) + (cont_drivetrain[5].get_temperature()) / 6);
+        }
+    };
+}
+\end{minted}
+
+\section*{Include}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+// (include.cpp)
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <memory>
+#include <algorithm>
+#include <iterator>
+#include <cstdlib>
+#include <cmath>
+#include <ctime>
+#include <utility>
+#include <string>
+#include <random>
+#include "main.h"
+#include "lemlib/api.hpp"
+#include "include/ai_folder/ai_versions/ai_v0.2/neural_network.cpp"
+\end{minted}
+\section*{Scr - Main}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+    // (src/main.cpp)
+
+
+
+// includes the other code that get called in "main.cpp"
+#include "common.cpp"
+
+// makes a char enum value for all of our pneumatic ports
+// naming convention 'solinoid' used for the enums, for a more long term project I would make it a class, but this is subject to change at the drop of a hat
+#define intake_solenoid 'E'
+#define wrist_solenoid 'B'
+#define arm_solenoid 'C'
+#define mogo_solenoid 'D'
+#define chopper_solenoid 'F'
+
+// just as before, makes an enum value for the intake ports; the sign of the enum signifies direction the motor spins
+#define intake_stage_1 -10
+#define intake_stage_2 -9
+
+const std::string PROGRAM = "Blue";
+const bool E_VARIENTCE = false;
+const double E_ENTROPY = 0.5;
+const bool USE_AI = true;
+
+// creates a controller object for the two controllers we use during matches
+pros::Controller controller_1(pros::E_CONTROLLER_MASTER);
+pros::Controller controller_2(pros::E_CONTROLLER_PARTNER);
+
+// a constructor for the pros::Motor objects used
+pros::Motor lm1(-15);
+pros::Motor lm2(14);
+pros::Motor lm3(-13);
+pros::Motor rm1(16);
+pros::Motor rm2(-12);
+pros::Motor rm3(11);
+pros::Motor intake_lower(intake_stage_1);
+pros::Motor intake_upper(intake_stage_2);
+
+// constructs an easily manipulatable std::vector<pros::Motor> for use in the program
+pros::MotorGroup left_motors({lm1.get_port(), lm2.get_port(), lm3.get_port()}, pros::MotorGears::blue);
+
+pros::MotorGroup right_motors({rm1.get_port(), rm2.get_port(), rm3.get_port()}, pros::MotorGears::blue);
+
+pros::MotorGroup intake({intake_lower.get_port(), intake_upper.get_port()}, pros::MotorGears::green);
+
+// constructs the drivetrain from the builder classes used in lemlib
+lemlib::Drivetrain drivetrain(&left_motors, &right_motors, 11.625, 3.25, 480, 8); //left motor group, right motor group, track width, wheel diameter, drive rpm, horizontal drift
+
+// constructs the imu used in heading tracking for odometery
+pros::IMU imu(5);
+
+// more lemlib builder class objects for odom
+lemlib::TrackingWheel leftVerticalWheel(&left_motors, lemlib::Omniwheel::NEW_325, -5.825, 480);
+lemlib::TrackingWheel rightVerticalWheel(&right_motors, lemlib::Omniwheel::NEW_325, 5.825, 480);
+
+lemlib::OdomSensors sensors(nullptr, nullptr, nullptr, nullptr, &imu); //vertical tracking wheels 1 & 2, horizontal tracking wheels 3 & 4, imu
+
+// pneumatics objects for the solinoids using the enums defined earlier, the second variable (bool) is used to denote startng position
+pros::adi::Pneumatics mogo_mech(mogo_solenoid, true);
+pros::adi::Pneumatics arm_mech(arm_solenoid, false);
+pros::adi::Pneumatics intake_mech(intake_solenoid, false);
+pros::adi::Pneumatics wrist_mech(wrist_solenoid, false);
+pros::adi::Pneumatics chopper_mech(chopper_solenoid, false);
+
+// lateral PID controller
+lemlib::ControllerSettings lateral_controller(8, // proportional gain (kP)
+                                              0, // integral gain (kI)
+                                              18, // derivative gain (kD)
+                                              0, // anti windup
+                                              0, // small error range, in inches
+                                              0, // small error range timeout, in milliseconds
+                                              0, // large error range, in inches
+                                              0, // large error range timeout, in milliseconds
+                                              0 // maximum acceleration (slew)
+);
+
+// angular PID controller
+lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
+                                              0, // integral gain (kI)
+                                              7, // derivative gain (kD)
+                                              0, // anti windup
+                                              0, // small error range, in inches
+                                              0, // small error range timeout, in milliseconds
+                                              0, // large error range, in inches
+                                              0, // large error range timeout, in milliseconds
+                                              0 // maximum acceleration (slew)
+);
+
+// input curve for throttle input during driver control
+lemlib::ExpoDriveCurve throttle_curve(2, // joystick deadband out of 127
+                                     0, // minimum output where drivetrain will move out of 127
+                                     1.023 // expo curve gain
+);
+
+// same thing for steering curves
+lemlib::ExpoDriveCurve steer_curve(2, 
+                                   0,
+                                   1.020
+);
+
+// create the chassis object
+lemlib::Chassis chassis(drivetrain, // drivetrain settings
+                        lateral_controller, // lateral PID settings
+                        angular_controller, // angular PID settings
+                        sensors, // odometry sensors
+                        &throttle_curve,
+                        &steer_curve
+);
+
+// a function called later in the program that determines which controller is the one that allows input used in controlling the robot
+std::vector<cmn::my_controller> get_active_controller(cmn::my_controller controller_1_input, cmn::my_controller controller_2_input) {
+    if(controller_1_input.is_master_controller) {
+        return {controller_1_input, controller_2_input};
+    } else {
+        return {controller_2_input, controller_1_input};
+    }
+}
+
+// the specific instance of a class that stores the varibles for the drive controls used by our driver Chase
+cmn::my_controller chase_config(cmn::my_controller chase) {
+    chase.arm_pneumatic_button = pros::E_CONTROLLER_DIGITAL_UP;
+    chase.wrist_pneumatic_button = pros::E_CONTROLLER_DIGITAL_LEFT;
+    chase.intake_pneumatic_button = pros::E_CONTROLLER_DIGITAL_RIGHT;
+    chase.mogo_pneumatic_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+    chase.switch_controller_button = pros::E_CONTROLLER_DIGITAL_B;
+    chase.intake_motor_button = pros::E_CONTROLLER_DIGITAL_R1;
+    chase.extake_motor_button = pros::E_CONTROLLER_DIGITAL_L1;
+    chase.load_arm_button = pros::E_CONTROLLER_DIGITAL_A;
+    chase.chopper_mech = pros::E_CONTROLLER_DIGITAL_L2;
+    chase.reverse = pros::E_CONTROLLER_DIGITAL_R2;
+
+    return chase;
+}
+
+// the same thing but this is for our driver miles
+cmn::my_controller miles_config(cmn::my_controller miles) {
+    miles.arm_pneumatic_button = pros::E_CONTROLLER_DIGITAL_L1;
+    miles.wrist_pneumatic_button = pros::E_CONTROLLER_DIGITAL_L2;
+    miles.mogo_pneumatic_button = pros::E_CONTROLLER_DIGITAL_DOWN;
+    miles.switch_controller_button = pros::E_CONTROLLER_DIGITAL_RIGHT;
+    miles.intake_motor_button = pros::E_CONTROLLER_DIGITAL_LEFT;
+    miles.extake_motor_button = pros::E_CONTROLLER_DIGITAL_UP;
+    miles.intake_pneumatic_button = pros::E_CONTROLLER_DIGITAL_A;
+    miles.extake_motor_button = pros::E_CONTROLLER_DIGITAL_UP;
+    miles.shift_button = pros::E_CONTROLLER_DIGITAL_X;
+
+    return miles;
+}
+
+// construct an object for the brain printing class
+cmn::GUI gui;
+
+// include the assets from the static folder used in lemlib pure pursuit, not used (yet)
+ASSET(path_jerryio_left_red_v1_1_txt);
+ASSET(path_jerryio_left_red_v1_2_txt);
+ASSET(path_jerryio_left_red_v1_3_txt);
+ASSET(path_jerryio_left_red_v1_4_txt);
+ASSET(path_jerryio_left_red_v1_5_txt);
+ASSET(example_txt);
+ASSET(ppTest_txt);
+
+
+// declare objects for the air tanks, tubes, pistons, and pneumatics components
+// declarations can get tedious because for every piece of real pneumatic components that have volume, an object must be constructed in the code
+cmn::Air_Tank tank1;
+cmn::Air_Tank tank2;
+
+cmn::Tube tank1_to_T;
+cmn::Tube t1_main;
+cmn::Tube doinker;
+cmn::Tube arm;
+cmn::Tube connector;
+cmn::Tube intake_tb;
+cmn::Tube clamp;
+cmn::Tube aux;
+cmn::Tube intake2;
+cmn::Tube main2;
+
+cmn::Piston ArmP;
+cmn::Piston DoinkerP;
+cmn::Piston intakeP;
+cmn::Piston auxP;
+cmn::Piston clamp1P;
+cmn::Piston clamp2P;
+cmn::Piston intake2P;
+
+cmn::Pneumatics_Component ArmC;
+cmn::Pneumatics_Component DoinkerC;
+cmn::Pneumatics_Component AuxC;
+cmn::Pneumatics_Component IntakeC;
+cmn::Pneumatics_Component ClampC;
+cmn::Pneumatics_Component TanksC;
+
+cmn::Pneumatics_System p_system;
+
+cmn::Controller_Print controller_print;
+
+// constructs and initalizes the pose of the robot within lemlib
+lemlib::Pose pose = chassis.getPose();
+
+int seed;
+
+void initialize() {
+    // start be converting then calculating the volume of all the components used
+    // #must be floats because it will not work properly when trying to preform floating point operations on an int
+    tank1_to_T.length = (3.0f / 2.54);
+    t1_main.length = (64.0f / 2.54);
+    doinker.length = (39.0f / 2.54);
+    arm.length = (42.0f / 2.54);
+    connector.length = ((18.0f + 19.0f + 3.0f) / 2.54);
+    intake_tb.length = (24.0f / 2.54);
+    clamp.length = (41.0f / 2.54);
+    aux.length = (3.0f / 2.54);
+    intake2.length = ((6.0f + 3.0f) / 2.54);
+    main2.length = (20.0f / 2.54);
+
+    ArmP.stroke = 75.0f;
+    DoinkerP.stroke = 75.0f;
+    intakeP.stroke = 75.0f;
+    auxP.stroke = 75.0f;
+    clamp1P.stroke = 50.0f;
+    clamp2P.stroke = 50.0f;
+    intake2P.stroke = 50.0f;
+
+    // calculate the actual volumes of each object
+    ArmP.init();
+    arm.init();
+    DoinkerP.init();
+    t1_main.init();
+    doinker.init();
+    aux.init();
+    auxP.init();
+    intakeP.init();
+    intake2P.init();
+    intake_tb.init();
+    intake2.init();
+    clamp1P.init();
+    clamp2P.init();
+    clamp.init();
+    tank1_to_T.init();
+    main2.init();
+
+    ArmC.volumes.push_back(ArmP.volume);
+    ArmC.volumes.push_back(arm.volume);
+
+    DoinkerC.volumes.push_back(DoinkerP.volume);
+    //DoinkerC.volumes.push_back(t1_main.volume);
+    DoinkerC.volumes.push_back(doinker.volume);
+
+    AuxC.volumes.push_back(aux.volume);
+    AuxC.volumes.push_back(auxP.volume);
+
+    IntakeC.volumes.push_back(intakeP.volume);
+    IntakeC.volumes.push_back(intake_tb.volume);
+    IntakeC.volumes.push_back(intake2P.volume);
+    IntakeC.volumes.push_back(intake2.volume);
+
+    ClampC.volumes.push_back(clamp1P.volume);
+    ClampC.volumes.push_back(clamp2P.volume);
+    ClampC.volumes.push_back(clamp.volume);
+
+    TanksC.volumes.push_back(tank1_to_T.volume);
+    TanksC.volumes.push_back(t1_main.volume);
+    TanksC.volumes.push_back(main2.volume);
+    TanksC.volumes.push_back(tank2.capacity);
+    TanksC.volumes.push_back(tank1.capacity);
+
+    ArmC.compute_system_volume();
+    DoinkerC.compute_system_volume();
+    AuxC.compute_system_volume();
+    IntakeC.compute_system_volume();
+    ClampC.compute_system_volume();
+    TanksC.compute_system_volume();
+
+    p_system.system_init({ArmC, DoinkerC, AuxC, IntakeC, ClampC, TanksC});
+
+    // prepare the screen for printing
+    pros::lcd::initialize();
+
+    // the prefered drivetrain setup by both drivers
+    chassis.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+
+    // this is where we can name individual autons for display on the brain during selection
+    gui.auton_name_list.push_back("RL AWP");
+    gui.auton_name_list.push_back("RR E");
+    gui.auton_name_list.push_back(" ");
+    gui.auton_name_list.push_back(" ");
+    gui.auton_name_list.push_back(" ");
+    gui.auton_name_list.push_back(" ");
+    gui.auton_name_list.push_back(" ");
+    gui.auton_name_list.push_back(" ");
+
+    intake.set_encoder_units(pros::E_MOTOR_ENCODER_DEGREES);
+
+    seed = pros::micros() + std::time(0) + static_cast<int>(lm1.get_position());
+
+    // a critical function in order to get odemetry to work
+    chassis.calibrate();
+}
+
+void red_right_elims(lemlib::Chassis& chassis) {
+    chassis.setPose(0, 0, 180);
+    mogo_mech.retract();
+
+    // all the code for the autons
+    // basically just scripting, not to exiting
+    chassis.moveToPose(1, 13, 150, 2100, {.forwards=false, .maxSpeed= 71, .minSpeed=1, .earlyExitRange=0.25});
+    chassis.moveToPose(-5, 29, 150, 1500, {.forwards=false, .maxSpeed=71});
+    arm_mech.extend();
+    pros::delay(1400);
+    mogo_mech.extend();
+    pros::delay(500);
+    chassis.moveToPose(5, 18, 30, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    intake_upper.move_velocity(200);
+    intake_lower.move_velocity(200);
+    chassis.moveToPose(17, 34, 30, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    intake_lower.move_velocity(200);
+    intake_upper.move_velocity(200);
+    chassis.moveToPoint(-12, 24, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=3});
+    chassis.moveToPoint(-33, 8, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    intake_mech.extend();
+    intake.move_velocity(200);
+    pros::delay(750);
+    intake.move_velocity(200);
+    chassis.turnToPoint(24, 2.5, 500, {.maxSpeed=71, .minSpeed=1, .earlyExitRange=.25});
+    intake_mech.retract();
+    arm_mech.retract();
+    intake_upper.move_velocity(200);
+    intake.move_velocity(200);
+    pros::delay(500);
+    intake_lower.move_velocity(0);
+    chassis.moveToPose(20, 6, 105, 3000, {.maxSpeed=71, .minSpeed = 31, .earlyExitRange = 1});
+    intake.move_velocity(200);
+    pros::delay(500);
+    intake_lower.move_velocity(0);
+    intake_upper.move_velocity(200);
+    chassis.moveToPose(16, 12, 315, 2000, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    pros::delay(100);
+    mogo_mech.retract();
+    intake_upper.move_velocity(0);
+    intake_upper.move_relative(-360, 200);
+    chassis.moveToPose(22, 44, 180, 2750, {.forwards=false});
+    
+
+    /*chassis.setPose(-50, -30, 270);
+    arm_mech.extend();
+    chassis.moveToPose(-31.75, -27.75, 240, 2000, {.forwards=false, .minSpeed=31, .earlyExitRange = .5});
+    chassis.moveToPose(-19, -22.5, 240, 2000, {.forwards=false, .minSpeed = 1, .earlyExitRange=.25});
+    chassis.moveToPose(-33, -33.5, 180, 1200, {.minSpeed = 31, .earlyExitRange = .5});
+    pros::delay(10);
+    mogo_mech.extend();
+    intake.move_velocity(200);
+    chassis.moveToPoint(-20, -52, 2000, {.minSpeed = 28, .earlyExitRange =.5});
+    intake.move_velocity(200);
+    chassis.moveToPose(-33, -8, 315, 2000, {.minSpeed = 31, .earlyExitRange =1});
+    intake_upper.move_velocity(200);
+    chassis.moveToPose(-51, 4, 270, 2000, {.minSpeed = 1, .earlyExitRange = .1});
+    intake.move_velocity(200);
+    intake_mech.extend();
+    chassis.moveToPose(-52, -52, 135, 3000, {.minSpeed = 31, .earlyExitRange = .1});
+    intake_mech.retract();
+    intake.move_velocity(200);
+    mogo_mech.retract();
+    chassis.moveToPose(-30, -30, 200, 5000, {.minSpeed = 1, .earlyExitRange = .5});
+    chassis.moveToPose(-12, -45.5, 270, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=0.1});
+    mogo_mech.retract();*/
+}
+
+void blue_left_elims(lemlib::Chassis& chassis) {
+    chassis.setPose(0, 0, 180);
+    mogo_mech.retract();
+
+    // all the code for the autons
+    // basically just scripting, not to exiting
+    chassis.moveToPose(-1, 13, -150, 2100, {.forwards=false, .maxSpeed= 71, .minSpeed=1, .earlyExitRange=0.25});
+    arm_mech.extend();
+    chassis.moveToPose(7, 30, -150, 1500, {.forwards=false, .maxSpeed=71});
+    pros::delay(1400);
+    mogo_mech.extend();
+    pros::delay(500);
+    chassis.moveToPose(-5, 18, -30, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    intake_upper.move_velocity(200);
+    intake_lower.move_velocity(200);
+    chassis.moveToPose(-17, 34, -30, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    intake_lower.move_velocity(200);
+    intake_upper.move_velocity(200);
+    chassis.moveToPoint(12, 24, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=3});
+    chassis.moveToPoint(33, 8, 2500, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    intake_mech.extend();
+    intake.move_velocity(200);
+    pros::delay(750);
+    intake.move_velocity(200);
+    chassis.turnToPoint(-24, 2.5, 500, {.maxSpeed=71, .minSpeed=1, .earlyExitRange=.25});
+    intake_mech.retract();
+    arm_mech.retract();
+    intake_upper.move_velocity(200);
+    intake.move_velocity(200);
+    pros::delay(500);
+    intake_lower.move_velocity(0);
+    chassis.moveToPose(-20, 6, -105, 3000, {.maxSpeed=71, .minSpeed = 31, .earlyExitRange = 1});
+    intake.move_velocity(200);
+    pros::delay(500);
+    intake_lower.move_velocity(0);
+    intake_upper.move_velocity(200);
+    chassis.moveToPose(-16, 12, -315, 2000, {.maxSpeed=71, .minSpeed=10, .earlyExitRange=1});
+    pros::delay(100);
+    mogo_mech.retract();
+    intake_upper.move_velocity(0);
+    intake_upper.move_relative(-360, 200);
+    chassis.moveToPose(-22, 44, 180, 2750, {.forwards=false});
+    
+
+    /*chassis.setPose(-50, -30, 270);
+    arm_mech.extend();
+    chassis.moveToPose(-31.75, -27.75, 240, 2000, {.forwards=false, .minSpeed=31, .earlyExitRange = .5});
+    chassis.moveToPose(-19, -22.5, 240, 2000, {.forwards=false, .minSpeed = 1, .earlyExitRange=.25});
+    chassis.moveToPose(-33, -33.5, 180, 1200, {.minSpeed = 31, .earlyExitRange = .5});
+    pros::delay(10);
+    mogo_mech.extend();
+    intake.move_velocity(200);
+    chassis.moveToPoint(-20, -52, 2000, {.minSpeed = 28, .earlyExitRange =.5});
+    intake.move_velocity(200);
+    chassis.moveToPose(-33, -8, 315, 2000, {.minSpeed = 31, .earlyExitRange =1});
+    intake_upper.move_velocity(200);
+    chassis.moveToPose(-51, 4, 270, 2000, {.minSpeed = 1, .earlyExitRange = .1});
+    intake.move_velocity(200);
+    intake_mech.extend();
+    chassis.moveToPose(-52, -52, 135, 3000, {.minSpeed = 31, .earlyExitRange = .1});
+    intake_mech.retract();
+    intake.move_velocity(200);
+    mogo_mech.retract();
+    chassis.moveToPose(-30, -30, 200, 5000, {.minSpeed = 1, .earlyExitRange = .5});
+    chassis.moveToPose(-12, -45.5, 270, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=0.1});
+    mogo_mech.retract();*/
+}
+
+void skills(lemlib::Chassis& chassis) {
+
+    if (!USE_AI) {
+        chassis.setPose(0, 0, 0);
+        chassis.moveToPose(12, -24, 0, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=0.25});
+            mogo_mech.retract();
+        chassis.moveToPose(-5, -62, 45, 5000, {.forwards=false});
+            pros::delay(500);
+            mogo_mech.extend();
+            intake_upper.move_velocity(200);
+        chassis.moveToPoint(24, -62 + 24, 2000);
+            mogo_mech.retract();
+            pros::delay(500);
+            intake_upper.move_velocity(0);
+    } else {
+        NeuralNetwork agent;
+        AdamWOptimizer agentOptimizer(0.001, 0.9, 0.999, 0.01, 1e-4);
+
+        agent.add_layer(Layer(5, 256, "relu", agentOptimizer));
+        agent.add_layer(Layer(256, 256, "relu", agentOptimizer));
+        agent.add_layer(Layer(256, 256, "relu", agentOptimizer));
+        agent.add_layer(Layer(256, 5, "linear", agentOptimizer));
+
+        agent.load("agent_network_params.txt");
+
+        std::vector<std::vector<double>> outputs = agent.forward({lm1.get_actual_velocity(), rm1.get_actual_velocity(), intake_lower.get_actual_velocity(), intake_upper.get_actual_velocity(), static_cast<double>(mogo_mech.is_extended())});
+
+        left_motors.move_velocity(outputs[0][0]);
+        right_motors.move_velocity(outputs[0][1]);
+        intake_lower.move_velocity(outputs[0][2]);
+        intake_upper.move_velocity(outputs[0][3]);
+        mogo_mech.set_value(static_cast<bool>(std::round(outputs[0][4])));
+
+        pros::delay(100);
+    }
+}
+
+double get_rand_double() {
+    std::srand(seed);
+    return static_cast<double>(rand()) / static_cast<double>(RAND_MAX);
+}
+
+double derating_level () {
+   return E_ENTROPY < get_rand_double() ? .5 > get_rand_double() ? 12.5 : 25 : 100;
+}
+
+void autonomous() {
+    // Switch the brain to displaying current motor temperature status in preperation for the match
+    gui.current_view = 1;
+    
+    if (PROGRAM == "Blue") {
+        blue_left_elims(chassis);
+    } else if (PROGRAM == "Red") {
+        red_right_elims(chassis);
+    } else if (PROGRAM == "Skills") {
+        skills(chassis);
+    }
+
+    // determines which autons run based on the one selected on the previous screen
+    /*switch (gui.selected_auton) {
+        case 0:
+            red_right_elims(chassis);
+            break;
+        case 1:
+            blue_left_elims(chassis);
+            break;
+        default:
+            break;
+        
+    }*/
+}
+
+void opcontrol() {
+
+    mogo_mech.extend();
+
+    gui.current_view = 1;
+
+    // gets a baseline for when opcontrol starts
+    unsigned int current_time = pros::millis();
+
+    // constructs objects, initializes objects, etc...
+    bool arm_toggle = 0;
+
+    cmn::my_controller chase;
+    cmn::my_controller miles;
+
+    chase.controller = &controller_1;
+    miles.controller = &controller_2;
+
+    chase = chase_config(chase);
+    miles = miles_config(miles);
+
+    chase.is_master_controller = true;
+    miles.is_master_controller = false;
+
+    cmn::my_controller master;
+    cmn::my_controller slave;
+
+    gui.motor_list.push_back(lm1);
+    gui.motor_list.push_back(lm2);
+    gui.motor_list.push_back(lm3);
+    gui.motor_list.push_back(rm1);
+    gui.motor_list.push_back(rm2);
+    gui.motor_list.push_back(rm3);
+    gui.motor_list.push_back(intake_lower);
+    gui.motor_list.push_back(intake_upper);
+
+    master = get_active_controller(chase, miles)[1];
+    slave = get_active_controller(chase, miles)[0];
+
+    controller_print.cont_drivetrain.push_back(lm1);
+    controller_print.cont_drivetrain.push_back(lm2);
+    controller_print.cont_drivetrain.push_back(lm3);
+    controller_print.cont_drivetrain.push_back(rm1);
+    controller_print.cont_drivetrain.push_back(rm2);
+    controller_print.cont_drivetrain.push_back(rm3);
+
+    controller_print.init(chase, miles);
+
+    arm_mech.extend();
+
+    std::srand(seed);
+
+    double throttle_rand = get_rand_double();
+    double steer_rand = get_rand_double();
+
+    double delay_extremity = get_rand_double() * 1000;
+
+    double arm_delay = E_ENTROPY < get_rand_double() ? get_rand_double() * delay_extremity : 0;
+    double wrist_delay = E_ENTROPY < get_rand_double() ? get_rand_double() * delay_extremity : 0;
+    double intake_mech_delay = E_ENTROPY < get_rand_double() ? get_rand_double() * delay_extremity : 0;
+    double mogo_delay = E_ENTROPY < get_rand_double() ? get_rand_double() * delay_extremity : 0;
+    double intake_delay = E_ENTROPY < get_rand_double() ? get_rand_double() * delay_extremity : 0;
+    double chopper_delay = E_ENTROPY < get_rand_double() ? get_rand_double() * delay_extremity : 0;
+
+    arm_delay = E_VARIENTCE == true ? arm_delay : 0;
+    wrist_delay = E_VARIENTCE == true ? wrist_delay : 0;
+    intake_mech_delay = E_VARIENTCE == true ? intake_mech_delay : 0;
+    mogo_delay = E_VARIENTCE == true ? mogo_delay : 0;
+    intake_delay = E_VARIENTCE == true ? intake_delay : 0;
+    chopper_delay = E_VARIENTCE == true ? get_rand_double() > .5 ? chopper_delay : 0 : 0;
+
+    //left_motors.set_voltage_limit_all(derating_level() * 120);
+    //right_motors.set_voltage_limit_all(derating_level() * 120);
+    // intake.set_voltage_limit_all(derating_level() * 120);
+
+    // runs until the program is turned off
+	while(1){
+        // finds the current time relative to when the opcontrol function was called relitive to the initalialize funtion
+        unsigned int opcontrol_time = pros::millis() - current_time;
+        // set the current pneumatics for printing on the controller
+        controller_print.p_sys = p_system;
+        // creates an inverse of opcontrol_time for keeping track of remaining time during a match
+        unsigned int time_left;
+
+        if(opcontrol_time > 105000) {
+            time_left = 0;
+        } else if (PROGRAM != "Skills") {
+            time_left = 105000 - opcontrol_time;
+        } else {
+            time_left = 60000 - opcontrol_time;
+        }
+
+        controller_print.time = time_left;
+
+        if ((time_left < 15000 && time_left > 12000 ) && PROGRAM != "Skills") {
+            master.controller->rumble("-");
+            slave.controller->rumble("-");
+        } else if (PROGRAM == "Skills") {
+            if ((time_left > 60000 - 12000 && time_left < 60000 - 15000) || (time_left > 60000 - (12000 + 15000) && time_left < 60000 - (15000 + 15000)) || (time_left > 60000 - (12000 + 30000) && time_left < 60000 - (15000 + 30000)) || (time_left > 60000 - (12000 + 45000) && time_left < 60000 - (15000 + 45000))) {
+                master.controller->rumble("-");
+            }
+        }
+
+        // a check to see which controller is the one controlling the robot and to see which one is reciving the stats
+        if(master.controller->get_digital(master.switch_controller_button)) {
+            chase.is_master_controller = chase.is_master_controller;
+            miles.is_master_controller = !miles.is_master_controller;
+            master = get_active_controller(chase, miles)[0];
+            slave = get_active_controller(chase, miles)[1];
+            master.controller->rumble("-");
+            chase.controller->clear();
+            miles.controller->clear();
+        }
+
+        // a hacky way to get the "master" and "slave"
+        master = get_active_controller(chase, miles)[0];
+        slave = get_active_controller(chase, miles)[1];
+
+        // all of the basic robot control scriping
+
+        double throttle, steer;
+
+        throttle = master.controller->get_analog(master.throttle_axis);
+        steer = master.controller->get_analog(master.steer_axis);
+
+        if (E_VARIENTCE == true) {
+            //throttle = (E_ENTROPY < get_rand_double() ? ((throttle_rand * 2 - 1) * .5) * throttle : 0) + throttle;
+            //steer = (E_ENTROPY < get_rand_double() ? ((steer_rand * 2 - 1) * .5) * steer : 0) + steer;
+        }
+
+        if (master.controller->get_digital(master.reverse)) {
+            throttle = -throttle;
+        }
+
+        // uses curvature drive when not at slow speeds, otherwise uses arcarde drive
+        if((throttle > 2) && (steer > 2)){
+		    chassis.curvature(throttle, steer);
+        } else {
+            chassis.arcade(throttle, steer);
+        }
+
+        if(master.controller->get_digital(master.arm_pneumatic_button)) {
+            pros::delay(arm_delay);
+            arm_mech.toggle();
+            p_system.cycled(ArmC);
+            while (master.controller->get_digital(master.arm_pneumatic_button)) {
+                pros::delay(2);
+            }
+            if (!arm_mech.is_extended()) {
+                wrist_mech.retract();
+            }
+        }
+
+        if(master.controller->get_digital(master.wrist_pneumatic_button)) {
+            pros::delay(wrist_delay);
+            wrist_mech.toggle();
+            p_system.cycled(AuxC);
+            while(master.controller->get_digital(master.wrist_pneumatic_button)) {
+                pros::delay(2);
+            }
+        }
+
+        if(master.controller->get_digital(master.intake_pneumatic_button)) {
+            pros::delay(intake_mech_delay);
+            intake_mech.toggle();
+            p_system.cycled(IntakeC);
+            while(master.controller->get_digital(master.intake_pneumatic_button)) {
+                pros::delay(2);
+            }
+        }
+
+        if(master.controller->get_digital(master.mogo_pneumatic_button)) {
+            pros::delay(mogo_delay);
+            mogo_mech.toggle();
+            if(mogo_mech.is_extended() == false) {
+                intake_upper.move_relative(-600.0f, 200);
+            }
+            p_system.cycled(ClampC);
+            while(master.controller->get_digital(master.mogo_pneumatic_button)) {
+                pros::delay(2);
+            }
+        }
+
+        if (master.controller->get_digital(master.intake_motor_button)) {
+            pros::delay(intake_delay);
+            intake.move_velocity(200);
+        } else if (master.controller->get_digital(master.extake_motor_button)) {
+            pros::delay(intake_delay);
+            intake.move_velocity(-200);
+        } else {
+            intake.move_velocity(0);
+        }
+
+        if (master.controller->get_digital(master.chopper_mech)) {
+            pros::delay(chopper_delay);
+            chopper_mech.extend();
+            p_system.cycled(DoinkerC);
+        } else {
+            pros::delay(chopper_delay);
+            chopper_mech.retract();
+        }
+
+        // renders the brain
+        gui.render();
+
+        // renders the controllers
+        controller_print.print_master(master);
+        controller_print.print_slave(slave);
+
+        // would be more important if we had thread scheduling, but for now its just there as good practice
+		pros::delay(15);
+	}
+}
+\end{minted}
+\section*{AI Folder - AI Versions V0.2}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+// (include/ai_folder/ai_versions/ai_v0.2/linear_regression.cpp)
+// another testbed that I like to use
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <cassert>
+#include <algorithm>
+
+#include "neural_network.cpp"
+
+using namespace std;
+
+vector<vector<double>> generate_data(int num_samples) {
+    vector<vector<double>> data(num_samples, vector<double>(2));
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<> dis(-10, 10);
+
+    for (int i = 0; i < num_samples; ++i) {
+        data[i][0] = dis(gen);
+        data[i][1] = 3.0 * data[i][0] + 5.0; // y = 3x + 5 + noise
+    }
+    return data;
+}
+
+vector<vector<double>> extract_inputs(const vector<vector<double>>& data) {
+    vector<vector<double>> inputs(data.size(), vector<double>(1));
+    for (size_t i = 0; i < data.size(); ++i) {
+        inputs[i][0] = data[i][0];
+    }
+    return inputs;
+}
+
+vector<vector<double>> extract_outputs(const vector<vector<double>>& data) {
+    vector<vector<double>> outputs(data.size(), vector<double>(1));
+    for (size_t i = 0; i < data.size(); ++i) {
+        outputs[i][0] = data[i][1];
+    }
+    return outputs;
+}
+
+double mean_squared_error(const vector<vector<double>>& predicted, const vector<vector<double>>& actual) {
+    double mse = 0.0;
+    for (size_t i = 0; i < predicted.size(); ++i) {
+        mse += pow(predicted[i][0] - actual[i][0], 2);
+    }
+    return mse / predicted.size();
+}
+
+void linear_regression_test() {
+    AdamWOptimizer optimizer(0.05, 0.9, 0.999, 0.001, 1e-4);
+    NeuralNetwork nn;
+    nn.add_layer(Layer(1, 1, "linear", optimizer));
+
+    // Generate data
+    vector<vector<double>> data = generate_data(100);
+    vector<vector<double>> inputs = extract_inputs(data);
+    vector<vector<double>> targets = extract_outputs(data);
+
+    double CLIP_THRESHOLD = 1.05;
+
+    // Training
+    for (int epoch = 0; epoch <= 70; ++epoch) {
+        auto predictions = nn.forward(inputs);
+        vector<vector<double>> errors(predictions.size(), vector<double>(1));
+        for (size_t i = 0; i < predictions.size(); ++i) {
+            errors[i][0] = -predictions[i][0] + targets[i][0];
+        }
+        nn.backward(errors, CLIP_THRESHOLD);
+        nn.update_weights();
+
+        if (epoch % 10 == 0) {
+            double mse = mean_squared_error(predictions, targets);
+            std::cout << "Epoch " << epoch << ", MSE: " << mse << endl;
+
+            auto final_predictions = nn.forward(inputs);
+
+            vector<vector<double>> final_input = {{4}};
+
+            vector<vector<double>> intermediate_output = nn.forward(final_input);
+
+            cout << "(4 * 3) + 5 = " << intermediate_output[0][0] << endl;
+        }
+    }
+}
+
+int main() {
+    linear_regression_test();
+    return 0;
+}
+\end{minted}
+\section*{AI Folder - AI Versions}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+// (include/ai_folder/ai_versions/ai.cpp)
+// A very early ineffective verion of me trying rl. Included to show pregression
+
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+#include <ctime>
+#include <utility>
+
+// Function to apply ReLU activation
+double ReLU(double x)
+{
+    return std::max(0.0, x);
+}
+
+class LayerDense
+{
+public:
+    void initialize(size_t n_inputs, size_t n_neurons, const std::vector<std::vector<double>> &weights, const std::vector<double> &biases);
+    std::vector<std::vector<double>> forward(const std::vector<std::vector<double>> &inputs);
+    bool apply_ReLU = true;
+
+private:
+    std::vector<std::vector<double>> weights;
+    std::vector<double> biases;
+};
+
+void LayerDense::initialize(size_t n_inputs, size_t n_neurons, const std::vector<std::vector<double>> &init_weights, const std::vector<double> &init_biases)
+{
+    weights = init_weights;
+    biases = init_biases;
+}
+
+std::vector<std::vector<double>> LayerDense::forward(const std::vector<std::vector<double>> &inputs)
+{
+    std::vector<std::vector<double>> output(inputs.size(), std::vector<double>(biases.size(), 0.0));
+    for (size_t i = 0; i < inputs.size(); ++i)
+    {
+        for (size_t k = 0; k < biases.size(); ++k)
+        {
+            double sum = 0.0;
+            for (size_t j = 0; j < inputs[i].size(); ++j)
+            {
+                sum += inputs[i][j] * weights[j][k];
+            }
+            output[i][k] = sum + biases[k];
+            // Apply ReLU activation
+            if (apply_ReLU == true)
+            {
+                output[i][k] = ReLU(output[i][k]);
+            }
+        }
+    }
+    return output;
+}
+
+namespace ai{
+
+class NeuralNetwork
+{
+public:
+    std::string FILENAME = "NNQtable";
+    double greedy_start = 1.0f;
+    unsigned char selected_models = 1;
+    unsigned short episodes = 1;
+    unsigned short current_epoch = 0;
+    double LEARNINGRATE = 1.0;
+
+private:
+    double greedy_value()
+    {
+        double greedy_min = greedy_start * 0.001f;
+        double decay_rate = LEARNINGRATE;
+        return (greedy_min + (greedy_start - greedy_min)) * std::exp(-decay_rate * current_epoch);
+    }
+
+    double range_rand(const int &range)
+    {
+        return ((std::rand() % (range * 2)) - range) / static_cast<double>(range / 2);
+    }
+
+    double greedy_adjusted_value(double &inputs, const double &greedy_val)
+    {
+        return inputs + (range_rand(1000) * greedy_val);
+    }
+
+    std::vector<std::string> file_name(const std::string &base_file_name)
+    {
+        std::vector<std::string> output;
+        for (unsigned char j = 0; j < selected_models; ++j)
+        {
+            std::string index_str = std::to_string(j + 1);
+            std::string file_name = base_file_name + index_str + ".txt";
+            output.push_back(file_name);
+        }
+        return output;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<double>>>> readTxt(const std::string &file_name, unsigned char iteration_number)
+    {
+        std::vector<std::vector<std::vector<std::vector<double>>>> output;
+
+        std::string line;
+        std::ifstream file(file_name);
+
+        while (std::getline(file, line))
+        {
+            std::istringstream iss(line);
+            unsigned char i, j, k, l;
+            double value;
+            if (iss >> i >> j >> k >> l >> value)
+            {
+                while (output.size() <= i)
+                    output.push_back({});
+                while (output[i].size() <= j)
+                    output[i].push_back({});
+                while (output[i][j].size() <= k)
+                    output[i][j].push_back({});
+                output[i][j][k].push_back(value);
+            }
+        }
+
+        file.close();
+        return output;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<double>>>> mutated_values(std::vector<std::vector<std::vector<std::vector<double>>>> input_data)
+    {
+        for (unsigned short index = 0; index < input_data.size(); ++index)
+        {
+            for (unsigned short k = 0; k < input_data[index].size(); ++k)
+            {
+                for (unsigned short j = 0; j < input_data[index][k].size(); ++j)
+                {
+                    for (unsigned short a = 0; a < input_data[index][k][j].size(); ++a)
+                    {
+                        input_data[index][k][j][a] = greedy_adjusted_value(input_data[index][k][j][a], greedy_value());
+                    }
+                }
+            }
+        }
+        return input_data;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> generate_batch(const unsigned char n_batch_size)
+    {
+        std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> output(n_batch_size);
+        std::vector<std::string> names = file_name(FILENAME);
+
+        unsigned char actual_batch_size = std::min(n_batch_size, static_cast<unsigned char>(names.size()));
+
+        for (char j = 0; j < actual_batch_size; ++j)
+        {
+            std::string name_gen = names.at(j);
+            std::vector<std::vector<std::vector<std::vector<double>>>> input = mutated_values(readTxt(name_gen, j));
+            output[j] = input;
+        }
+        return output;
+    }
+
+void creation_cycle(std::ofstream &newFile)
+{
+    static bool d = false;
+    newFile << 0.001f;
+
+    if (!d)
+    {
+        newFile << ",";
+    }
+    else
+    {
+        newFile << " ";
+    }
+    d = !d;
+}
+
+
+    void create_model(const std::vector<std::string> &file_names, char n_input, char &n_hidden_neurons, char &n_hidden_layers, char &n_output)
+{
+    for (unsigned char i = 0; i < file_names.size(); ++i)
+    {
+        std::string filename = file_names[i];
+        std::ofstream newFile(filename);
+        if (!newFile.is_open())
+        {
+            std::cerr << "Error: Could not open file " << filename << std::endl;
+            continue;
+        }
+
+        for (unsigned char j = 0; j < (n_input * 2); ++j)
+        {
+            creation_cycle(newFile);
+        }
+        newFile << std::endl;
+
+        for (char k = 0; k < n_hidden_layers; ++k)
+        {
+            for (unsigned char m = 0; m < (n_hidden_neurons * 2); ++m)
+            {
+                creation_cycle(newFile);
+            }
+            newFile << std::endl;
+        }
+
+        for (unsigned char g = 0; g < (n_output * 2); ++g)
+        {
+            creation_cycle(newFile);
+        }
+        newFile << std::endl;
+
+        newFile.close();
+    }
+}
+
+
+    void create_multiple_models(char n_input, char n_hidden_neurons, char n_hidden_layers, char n_output)
+    {
+        for (unsigned char j = 0; j < selected_models; ++j)
+        {
+            create_model(file_name(FILENAME), n_input, n_hidden_neurons, n_hidden_layers, n_output);
+        }
+    }
+
+    unsigned short total_lines(const std::string &input)
+    {
+        std::ifstream file(input);
+        unsigned int count = 0;
+        std::string line;
+
+        while (std::getline(file, line))
+        {
+            ++count;
+        }
+
+        file.close();
+        return count;
+    }
+
+    unsigned short n_neurons_of_line(const std::string &input, unsigned short target_line)
+    {
+        std::ifstream file(input);
+        unsigned short count = 0;
+        std::string line;
+        char character;
+        unsigned short index = 0;
+
+        for (unsigned short i = 0; i < target_line; ++i)
+        {
+            std::getline(file, line);
+            ++count;
+        }
+
+        while (file.get(character))
+        {
+            if (character == '\n')
+            {
+                return index / 3;
+            }
+            if (character == ' ' || character == '\t')
+            {
+                if (character == ' ')
+                {
+                    ++index;
+                }
+            }
+        }
+        file.close();
+        return index;
+    }
+
+    double find_value(const std::string &file_name, unsigned char nn_layer, unsigned short dataset_in_layer, unsigned char weight_or_bias)
+    {
+        double output;
+        std::string outputstr;
+        std::ifstream file(file_name);
+        std::string line;
+        char character;
+
+        for (unsigned char i = 0; i < nn_layer;)
+        {
+            std::getline(file, line);
+        }
+
+        for (unsigned short k = 0; k < dataset_in_layer; ++k)
+        {
+            file.get(character);
+            if (character == ' ')
+            {
+                file.get(character);
+                if (character == ' ')
+                {
+                    ++k;
+                }
+            }
+
+            if (k + 1 == dataset_in_layer)
+            {
+                if (weight_or_bias == 0)
+                {
+                    file.get(character);
+                    while (character != ' ')
+                    {
+                        file.get(character);
+                    }
+                    file >> outputstr;
+                }
+                else
+                {
+                    file.get(character);
+                    while (character != ' ')
+                    {
+                        file.get(character);
+                    }
+                    file >> outputstr;
+                }
+                output = std::stof(outputstr);
+            }
+        }
+
+        return output;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> full_read_of_files(const std::string &base_file_name)
+    {
+        std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> output;
+        std::vector<std::string> names = file_name(base_file_name);
+        output.resize(names.size());
+
+        for (unsigned char my_file_name = 0; my_file_name < names.size(); my_file_name++)
+        {
+            std::ifstream nfile(names[my_file_name]);
+
+            std::stringstream buffer;
+            buffer << nfile.rdbuf(); // Read the entire file into the stringstream
+            nfile.close();
+        
+            std::string file_content = buffer.str();
+            std::stringstream file_stream(file_content);
+
+            unsigned short total_lines_of_file = total_lines(names[my_file_name]);
+            std::string temp_string = "";
+
+            for (unsigned short file_lines = 0; file_lines < total_lines_of_file;)
+            {
+                char character;
+                bool weight = false;
+                unsigned short set_index = 0;
+
+                if (output[my_file_name].size() <= file_lines)
+                {
+                    output[my_file_name].resize(file_lines + 1);
+                }
+                if (output[my_file_name][file_lines].size() <= set_index)
+                {
+                    output[my_file_name][file_lines].resize(set_index + 1);
+                    output[my_file_name][file_lines][set_index].resize(2);
+                }
+
+                std::vector<char> temp_char_string(50);
+                unsigned short temp_char_string_index = 0;
+                double doubleValue;
+                file_stream.get(character);
+
+                switch (character)
+                {
+                case ' ':
+                    weight = false;
+                    output[my_file_name][file_lines][set_index][weight].push_back(doubleValue);
+                    set_index++;
+                    break;
+                case ',':
+                    weight = false;
+                    doubleValue = std::stof(temp_string);
+                    output[my_file_name][file_lines][set_index][weight].push_back(doubleValue);
+                    temp_string.clear();
+                    break;
+                case '\n':
+                    file_lines++;
+                    break;
+                default:
+                    temp_string.push_back(character);
+                    break;
+                }
+            }
+        }
+
+        return output;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> create_episodes(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> input_vector)
+    {
+        std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> output;
+
+        int TOTALNETWORKS = input_vector.size() * episodes;
+
+        output.resize(TOTALNETWORKS);
+
+        for (int currentSet = 0; currentSet < input_vector.size(); ++currentSet)
+        {
+            int intigralNet = 0;
+            for (int currentNetwork = 0; currentNetwork < episodes; ++currentNetwork)
+            {
+                output.push_back(input_vector[currentSet]);
+                ++intigralNet;
+            }
+        }
+        return output;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> mutate_batch(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> input)
+    {
+        for (unsigned short a = 0; a < input.size(); ++a)
+        {
+            for (unsigned short b = 0; b < input[a].size(); ++b)
+            {
+                for (unsigned short c = 0; c < input[a][b].size(); ++c)
+                {
+                    for (unsigned short d = 0; d < input[a][b][c].size(); ++d)
+                    {
+                        for (unsigned short e = 0; e < input[a][b][c][d].size(); ++e)
+                        {
+                            if (input[a][b][c][d].size() > e)
+                            {
+                                input[a][b][c][d][e] = greedy_adjusted_value(input[a][b][c][d][e], greedy_value());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return input;
+    }
+
+    std::vector<std::vector<std::vector<double>>> run_batch(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> &input, std::vector<std::vector<std::vector<double>>> &input_data)
+    {
+        LayerDense layer;
+        std::vector<std::vector<std::vector<double>>> output(input.size());
+
+        for (size_t input_first_index = 0; input_first_index < input.size(); ++input_first_index)
+        {
+            size_t num_layers = input[input_first_index].size();
+            std::vector<std::vector<double>> temp_output;
+
+            for (size_t input_second_index = 0; input_second_index < num_layers; ++input_second_index)
+            {
+                size_t n_inputs;
+                std::vector<std::vector<double>> weights;
+                std::vector<double> biases;
+                std::vector<std::vector<double>> forward_inputs;
+
+                for (size_t neuron_set_index = 0; neuron_set_index < input[input_first_index][input_second_index].size(); ++neuron_set_index)
+                {
+                    weights.push_back(std::vector<double>());
+                }
+
+                for (size_t neuron_set_index = 0; neuron_set_index < input[input_first_index][input_second_index].size(); ++neuron_set_index)
+                {
+                    if (input_second_index == 0)
+                    {
+                        n_inputs = input_data.size();
+                        forward_inputs = input_data[neuron_set_index];
+                    }
+                    else
+                    {
+                        n_inputs = input[input_first_index][input_second_index][neuron_set_index].size();
+                    }
+
+                    double temp_weight = input[input_first_index][input_second_index][neuron_set_index][0][0];
+                    weights[neuron_set_index].push_back(temp_weight);
+                    double temp_biases = input[input_first_index][input_second_index][neuron_set_index][0][1];
+                    biases.push_back(temp_biases);
+                }
+
+                layer.initialize(n_inputs, input[input_first_index][input_second_index].size(), weights, biases);
+
+                if (input_second_index != 0)
+                {
+                    forward_inputs = temp_output;
+                }
+
+                if (num_layers == input_second_index + 1)
+                {
+                    layer.apply_ReLU = false;
+                }
+
+                temp_output = layer.forward(forward_inputs);
+                layer.apply_ReLU = true;
+            }
+
+            output[input_first_index] = temp_output;
+        }
+        return output;
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> find_best_networks(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> &vector_of_networks, std::vector<double> &vector_of_scores)
+    {
+        std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> output;
+
+        std::vector<std::pair<double, int>> score_and_index;
+
+        for (int index = 0; index < vector_of_scores.size(); ++index)
+        {
+            score_and_index.push_back(std::make_pair(vector_of_scores[index], index));
+        }
+
+        std::sort(score_and_index.begin(), score_and_index.end(), std::greater<std::pair<double, int>>());
+
+        std::vector<int> top_episodes;
+
+        for (int second_index = 0; second_index < selected_models; ++second_index)
+        {
+            top_episodes.push_back(score_and_index[second_index].second);
+        }
+
+        for (int a = 0; a < top_episodes.size(); ++a)
+        {
+            output.push_back(vector_of_networks[top_episodes[a]]);
+        }
+
+        return output;
+    }
+
+    void write_data(const std::string &base_file_name, std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> &input)
+    {
+        for (int a = 0; a < input.size(); ++a)
+        {
+            std::ofstream newFile((base_file_name + std::to_string(a + 1) + ".txt"));
+            for (int b = 0; b < input[a].size(); ++b)
+            {
+                for (int c = 0; c < input[a][b].size(); ++c)
+                {
+                    for (int d = 0; d < input[a][b][c].size(); ++d)
+                    {
+                        bool commaSwitch = false;
+                        for (int e = 0; e < input[a][b][c][d].size(); ++e)
+                        {
+                            newFile << input[a][b][c][d][e];
+                            if (!commaSwitch)
+                            {
+                                newFile << ',';
+                                commaSwitch = true;
+                            }
+                            else
+                            {
+                                newFile << ' ';
+                                commaSwitch = false;
+                            }
+                        }
+                    }
+                }
+                newFile << '\n';
+            }
+            newFile.close();
+        }
+    }
+
+public:
+    void createnewmodel(int input, int neurons, int layers, int output)
+    {
+        create_multiple_models(input, neurons, layers, output);
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> mutate()
+    {
+        return mutate_batch(create_episodes(full_read_of_files(FILENAME)));
+    }
+
+    std::vector<std::vector<std::vector<double>>> run(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> inputNetworks, std::vector<std::vector<std::vector<double>>> &SCORES)
+    {
+        return run_batch(inputNetworks, SCORES);
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> selection(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> &mutatedData, std::vector<double> &testResults)
+    {
+        return find_best_networks(mutatedData, testResults);
+    }
+
+    void write(std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> data)
+    {
+        write_data(FILENAME, data);
+    }
+
+    std::vector<std::vector<std::vector<std::vector<std::vector<double>>>>> read() {
+        return full_read_of_files(FILENAME);
+    }
+
+    double ReLU(double input)
+    {
+        return ReLU(input);
+    }
+};
+};
+\end{minted}
+\section*{AI Folder - AI Versions V0.3}
+\begin{minted}[linenos, fontsize=\small]{cpp}
+// (include/ai_folder/ai_versions/ai_v0.2/cart-pole.cpp)
+// This is my testbed for testing new rl advancements
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+#include <algorithm>
+#include <cassert>
+#include <cstdlib>
+
+// Placeholder for the neural network and cart-pole environment
+#include "neural_network.cpp"
+#include "cart-pole-env.cpp"
+
+bool E_NEW_NET = true;
+
+
+// Function to sample an action based on action probabilities
+int sampleAction(const std::vector<double>& actionProbs) {
+    assert(actionProbs.size() == 1);  // For CartPole, we have two actions (left, right)
+    
+    double p = static_cast<double>(rand()) / RAND_MAX;
+    return (p < actionProbs[0]) ? 0 : 1;
+}
+
+// Main training loop for policy gradient
+void trainCartPolePolicyGradient(NeuralNetwork& actor, NeuralNetwork& critic, LinearRegression& env, int numEpisodes, double gamma, double learningRate, double GRADIENT_CLIP_THRESHOLD, double weight_decay) {
+    AdamWOptimizer actorOptimizer(learningRate, 0.9, 0.999, 0.01, weight_decay);
+    AdamWOptimizer criticOptimizer(learningRate, 0.9, 0.999, 0.01, weight_decay);
+
+    actor.add_layer(Layer(2, 128, "relu", actorOptimizer));
+    actor.add_layer(Layer(128, 128, "relu", actorOptimizer));
+    actor.add_layer(Layer(128, 1, "linear", actorOptimizer));  // Output probabilities for actions
+
+    critic.add_layer(Layer(2, 64, "relu", criticOptimizer));
+    critic.add_layer(Layer(64, 64, "relu", criticOptimizer));
+    critic.add_layer(Layer(64, 1, "linear", criticOptimizer));  // Single output for state value
+
+    if(E_NEW_NET == 1) {
+        // Save neural network to file
+        actor.save("actor_network_params.txt");
+        critic.save("critic_network_params.txt");
+    }
+
+    for (int episode = 0; episode <= numEpisodes; ++episode) {
+        // Load neural network from file
+        NeuralNetwork actorLoadedNN;
+        NeuralNetwork criticLoadedNN;
+        actorLoadedNN.load("actor_network_params.txt");
+        criticLoadedNN.load("critic_network_params.txt");
+
+        actor = actorLoadedNN;
+        critic = criticLoadedNN;
+
+        std::vector<std::vector<double>> states;
+        std::vector<int> actions;
+        std::vector<double> rewards, logProbs, values;
+
+        env.reset();
+        while (!env.isDone()) {
+            std::vector<double> state = env.getState();
+            states.push_back(state);
+
+            // Get action probabilities from the actor network
+            std::vector<std::vector<double>> actionProbs = actor.forward({state});
+
+            // Sample an action based on the probabilities
+            double action = actionProbs[0][0];  // Use the actionProbs for action sampling
+            actions.push_back(action);
+
+            // std::cout << "Action: " << action << '\n';
+            
+            // Log probability of the action
+            logProbs.push_back(std::log(std::max(action, 1e-8)));
+
+            // Get the value estimate from the critic network
+            std::vector<std::vector<double>> valueEstimates = critic.forward({state});
+            values.push_back(valueEstimates[0][0]);
+
+            // Take the action in the environment
+            env.step(action);
+
+            // Store the reward
+            rewards.push_back(env.getReward());
+        }
+
+        // Compute the advantages using the critic network
+        std::vector<double> advantages;
+        double reward = 0;
+
+        for (int t = 0; t < rewards.size(); ++t) {
+            double td_target = rewards[t] + (t < rewards.size() - 1 ? gamma * values[t + 1] : 0.0);
+            advantages.push_back(td_target - values[t]);
+            reward += rewards[t];
+        }
+
+        // Compute the policy (actor) loss
+        double actorLoss = computeLoss(logProbs, advantages);
+
+        if(episode % 100 == 0) {
+            std::cout << "Episode " << episode << ", Actor Loss: " << actorLoss << ", Reward: " << reward << std::endl;
+        }
+
+        // Compute the critic loss (mean squared error)
+        double criticLoss = 0.0;
+        for (size_t i = 0; i < rewards.size(); ++i) {
+            double td_target = rewards[i] + (i < rewards.size() - 1 ? gamma * values[i + 1] : 0.0);
+            criticLoss += pow(td_target - values[i], 2);
+        }
+        criticLoss /= rewards.size();
+
+        // Backpropagate and update actor network
+        actor.backward({{actorLoss}}, GRADIENT_CLIP_THRESHOLD);
+        actor.update_weights();
+
+        // Backpropagate and update critic network
+        critic.backward({{criticLoss}}, GRADIENT_CLIP_THRESHOLD);
+        critic.update_weights();
+
+        // Save neural network to file
+        actor.save("actor_network_params.txt");
+        critic.save("critic_network_params.txt");
+    }
+}
+
+int main() {
+    LinearRegression env;
+    NeuralNetwork actor;
+    NeuralNetwork critic;
+
+    trainCartPolePolicyGradient(actor, critic, env, 1000, 0.99, 0.01, 0.1, 1e-4);
+
+    return 0;
+}
+\end{minted}

@@ -1,0 +1,150 @@
+\important{Screw Strengths (December 12, 2024)}
+\chapterauthor{Ian Smith}
+\info{Ian Smith}{Screw Strengths}{December 12, 2024}
+\section*{Screw Strengths: Fasteners Calculation Notes}
+
+\subsection*{Formulas and Definitions}
+The following equations and definitions are used for fastener calculations:
+
+\begin{align*}
+    F_i &= 0.75 \times A_t \times S_p \\
+    S_p &= 0.85 \times S_y \\
+    \Delta &= \frac{F_i \cdot l}{A \cdot E}
+\end{align*}
+
+Where:
+\begin{itemize}
+    \item $F_i$ = preload
+    \item $A_t$ = tensile stress area (use tables to find values)
+    \item $S_p$ = proof strength
+    \item $S_y$ = yield strength
+    \item $\Delta$ = change in length of the bolt
+    \item $l$ = bolt length
+    \item $A$ = bolt area
+    \item $E$ = modulus of elasticity
+\end{itemize}
+
+Torque at the wrench can be calculated as:
+\[
+T = 0.2 \cdot F_i \cdot d
+\]
+Where:
+\begin{itemize}
+    \item $T$ = torque at the wrench
+    \item $d$ = nominal bolt diameter
+\end{itemize}
+
+\subsection*{Thread Tensile-Stress Area}
+The tensile-stress area of the thread is given by:
+\[
+A_s = \frac{\pi}{4} \left( \frac{(d - 1.299038 \cdot P) + (d - 0.649519 \cdot P)}{2} \right)^2
+\]
+Where:
+\begin{itemize}
+    \item $d$ = nominal diameter
+    \item $P$ = number of threads per inch
+\end{itemize}
+
+\subsection*{Relating Torque to Clamping Force}
+\[
+T_f = K \cdot F_f \cdot d
+\]
+Where:
+\begin{itemize}
+    \item $T_f$ = torque applied
+    \item $F_f$ = clamping force
+    \item $K$ = torque coefficient
+\end{itemize}
+
+The torque coefficient $K$ is given by:
+\[
+K = \frac{1}{2d} \left( \frac{P}{\pi} + \mu_s d_2 \sec \alpha' + \mu_w D_w \right)
+\]
+Where:
+\begin{itemize}
+    \item $P$ = thread pitch
+    \item $\mu_s$ = coefficient of friction (from tables)
+    \item $d_2$ = pitch diameter of the thread
+    \item $\mu_w$ = coefficient of friction between bearing surfaces
+    \item $D_w$ = equivalent diameter of friction torque bearing surfaces
+\end{itemize}
+
+The equivalent diameter of the friction torque bearing surfaces, $D_w$, is given by:
+\[
+D_w = \frac{2}{3} \cdot \frac{D_o^3 - D_i^3}{D_o^2 - D_i^2}
+\]
+Where:
+\begin{itemize}
+    \item $D_o$ = outside diameter of the bearing surface contact area
+    \item $D_i$ = inside diameter of the bearing surface contact area
+\end{itemize}
+
+\subsection*{Example Calculations}
+
+\subsubsection*{Material: 1035 Carbon Steel (1" 8-32 UNC Machine Screw)}
+Using normalized 1035 carbon steel with the following properties:
+\begin{itemize}
+    \item Tensile Strength: 75,000 psi
+    \item Yield Strength: 50,000 psi
+    \item Young’s Modulus: 29,000 ksi
+\end{itemize}
+
+\textbf{Step 1: Calculate Proof Strength}
+\[
+S_p = 0.85 \cdot S_y = 42,500 \, \text{psi}
+\]
+
+\textbf{Step 2: Calculate Tensile-Stress Area}
+\[
+A_s = \frac{\pi}{4} \left( \frac{(d - 1.299038 \cdot P) + (d - 0.649519 \cdot P)}{2} \right)^2
+\]
+\[
+A_s = 0.014367 \, \text{in}^2
+\]
+
+\textbf{Step 3: Calculate Preload}
+\[
+F_i = 0.75 \cdot A_s \cdot S_p = 457.948 \, \text{lbs}
+\]
+
+\textbf{Step 4: Calculate Change in Length}
+\[
+\Delta = \frac{F_i \cdot l}{A \cdot E}
+\]
+\[
+\Delta = 1.8688 \cdot 10^{-4} \, \text{in}
+\]
+
+\subsubsection*{Material: Aluminum Screw}
+Using a conservative yield strength of 10,000 psi:
+\begin{itemize}
+    \item $S_p = 8,500 \, \text{psi}$
+    \item $A_s = 0.0144 \, \text{in}^2$
+    \item $F_i = 91.8 \, \text{lbs}$
+    \item Young’s Modulus: $10,000 \, \text{ksi}$
+\end{itemize}
+
+\textbf{Change in Length:}
+\[
+\Delta = 0.0001086 \, \text{in}
+\]
+
+\subsubsection*{Material: Nylon Screw}
+Using a yield strength of 6,000 psi:
+\begin{itemize}
+    \item $S_p = 5,100 \, \text{psi}$
+    \item $A_s = 0.0144 \, \text{in}^2$
+    \item $F_i = 54.9538 \, \text{lbs}$
+    \item Young’s Modulus: $189 \, \text{ksi}$
+\end{itemize}
+
+\textbf{Change in Length:}
+\[
+\Delta = 3.441 \cdot 10^{-3} \, \text{in}
+\]
+
+\subsection*{References}
+\begin{itemize}
+    \item \href{https://www.machiningdoctor.com/threadinfo/?tid=15}{Machining Doctor Thread Info}
+    \item \href{https://matweb.com/search/DataSheet.aspx?MatGUID=8d78f3cfcb6f49d595896ce6ce6a2ef1&ckck=1}{Material Data Sheet}
+\end{itemize}

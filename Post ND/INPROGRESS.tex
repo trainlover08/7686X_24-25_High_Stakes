@@ -1,0 +1,245 @@
+\identify{Identify the Challenge \& Set Goals: MACHINING AND STRESS CALCULATIONS (November 18, 2024)}
+\info{Ian Smith}{MACHINING AND STRESS CALCULATIONS}{November 18, 2024}
+\chapterauthor{Ian Smith}
+\textbf{Goal}: We will identify an objective for our robot so that we can address it and build an effective solution
+\section*{Problem Statement}
+Often, we don't know the minimum axle size required when building. As a result, we tend to overbuild, using High-Strength Shafts (SKU: 276-7465) "\cite{vexRobotics}" in situations where they aren't necessary, out of concern for exceeding the torsional load of a low-strength shaft.
+\section*{Solution Goals}
+We would love to reduce the material usage, this would result in significant weight savings.
+\brainstorm{Brainstorm \& Diagram: MACHINING AND STRESS CALCULATIONS (November 18, 2024)}
+\info{Ian Smith}{MACHINING AND STRESS CALCULATIONS}{November 18, 2024}
+\chapterauthor{Ian Smith}
+\section*{Possible Solutions}
+\begin{itemize}
+	\item \textbf{Guess and Check}: The quickest and simplest approach but has the potential for catastrophic failure.
+	\item \textbf{Mathematical Analysis}: Involves deriving parts around calculated stresses. This approach is more complex and time-intensive.
+	\item \textbf{Stress Analysis in Fusion 360}: Offers dynamic, accurate calculations and is easy to apply on a per-part basis.
+\end{itemize}
+\solution{Choose a Solution: MACHINING AND STRESS CALCULATIONS (November 18, 2024)}
+\info{Ian Smith}{MACHINING AND STRESS CALCULATIONS}{November 18, 2024}
+\chapterauthor{Ian Smith}
+\section*{Choose a Solution}
+\begin{itemize}
+	\item Guess and Check
+	\item Mathematical Solution
+	\item CAD Analysis
+\end{itemize}
+
+\renewcommand{\arraystretch}{1.85} % Change this value as needed
+\begin{table}[htb!]
+\centering
+\begin{tabular}{|>{\centering\arraybackslash}m{1.85cm}|>{\centering\arraybackslash}m{1.85cm}|>{\centering\arraybackslash}m{1.85cm}|>{\centering\arraybackslash}m{1.85cm}|>{\centering\arraybackslash}m{1.85cm}|>{\centering\arraybackslash}m{1.85cm}|>{\centering\arraybackslash}m{1.85cm}|}
+\hline
+\textbf{Scale 1 - 10} & \textbf{Weight} & \textbf{Accuracy} & \textbf{Universality} & \textbf{Total} \tabularnewline
+\hline
+Weight & x2 & x1 & x3 & \tabularnewline
+\hline
+Guess and Check & 3 & 10 & 6 & 34\tabularnewline
+\hline
+Mathematical Solution & 8 & 6 & 10 & 54\tabularnewline
+\hline
+CAD Analysis & 10 & 7 & 7 & 48\tabularnewline
+\hline
+\end{tabular}
+\caption{Machining Decision Matrix}
+\label{tab:drive-matrix}
+\end{table}
+\renewcommand{\arraystretch}{1.85} % Reset to default
+
+I initially expected CAD analysis to be the best option. However, after weighing the criteria, the mathematical solution emerged as the most favorable approach. 
+
+\section*{Make a Plan}
+For this, I will rely exclusively on \machinists
+
+
+\build{Build: MACHINING AND STRESS CALCULATIONS (November 18, 2024)}
+\info{Ian Smith}{MACHINING AND STRESS CALCULATIONS}{November 18, 2024}
+\chapterauthor{Ian Smith}
+\section*{Building}
+\machinists provides the following formula:
+
+\[
+T = S_s \cdot Z_p
+\]
+
+Where:
+\begin{itemize}
+	\item \(T\): Torsional moment (PSI)
+	\item \(S_s\): Allowable shearing stress (PSI)
+	\item \(Z_p\): Polar section modulus
+\end{itemize}
+
+To calculate \(Z_p\), the formula for a square cross-section is:
+
+\[
+Z_p = 0.208a^3
+\]
+
+Where:
+\begin{itemize}
+	\item \(a\): Width of the square shaft
+\end{itemize}
+
+Next, we determine whether \(T\) is sufficient for the RPM and horsepower using:
+
+\[
+T = \frac{63000P}{N}
+\]
+
+Where:
+\begin{itemize}
+	\item \(N\): Shaft RPM
+	\item \(P\): Power applied to the shaft (HP)
+\end{itemize}
+
+Finally, the maximum allowable shearing stress \(S_s\) can be calculated as follows:
+
+\[
+S_w = \frac{S_m}{f_s}
+\]
+
+Where:
+\begin{itemize}
+	\item \(S_m\): Material strength
+	\item \(f_s\): Factor of safety
+\end{itemize}
+
+The working stress is adjusted by the stress concentration factor:
+
+\[
+\sigma = \frac{S_w}{K_t}
+\]
+
+Where:
+\begin{itemize}
+	\item \(K_t\): Stress concentration factor (based on material and load type)
+\end{itemize}
+
+Torsional stress (\(\tau\)) can be calculated as:
+
+\[
+\tau = \frac{T}{Z_p}
+\]
+
+The total stress on a member is given by:
+
+\[
+Z = \frac{L_a \cdot \tau}{\sigma}
+\]
+
+Where:
+\begin{itemize}
+	\item \(L_a\): Axle length
+\end{itemize}
+\test{Test the Solution: MACHINING AND STRESS CALCULATIONS (November 18, 2024)}
+\info{Ian Smith}{MACHINING AND STRESS CALCULATIONS}{November 18, 2024}
+\chapterauthor{Ian Smith}
+\section*{Test the Solution}
+For this test, consider a 100 RPM drive axle powered by a single motor at 2.12 Nm torque using a $\frac{1}{8}$
+inch shaft.
+
+Let:
+\begin{itemize}
+	\item \(K_t = 2.0\)
+	\item \(f_s = 2.0\)
+	\item \(L_a = 12 \, \text{inches}\)
+	\item \(a = \frac{1}{8} \, \text{inch}\)
+	\item \(S_m = 60000 \, \text{PSI}\)
+	\item \(N = 100\)
+	\item \(\tau = 2.12 \, \text{Nm}\)
+\end{itemize}
+
+First, convert torque to inch-pounds:
+
+\[
+\tau = 2.12 \, \text{Nm} = 0.7376 \cdot 2.12 = 1.5637 \, \text{inch-lbs}
+\]
+
+Next, calculate power (\(P\)) in horsepower:
+
+\[
+P = \frac{\tau \cdot N}{5252} = \frac{1.5637 \cdot 100}{5252} = 0.029774 \, \text{HP}
+\]
+
+Calculate \(S_w\):
+
+\[
+S_w = \frac{S_m}{f_s} = \frac{60000}{2} = 30000
+\]
+
+Calculate \(\sigma\):
+
+\[
+\sigma = \frac{S_w}{K_t} = \frac{30000}{2.0} = 15000
+\]
+
+Calculate \(T\):
+
+\[
+T = \frac{63000P}{N} = \frac{63000(0.029774)}{100} = 18.7476
+\]
+
+Calculate \(Z_p\) from \(a\):
+
+\[
+Z_p = 0.208a^3 = 0.208 \left(\frac{1}{8}\right)^3 = 0.00040625
+\]
+
+Calculate \(\tau\):
+
+\[
+\tau = \frac{T}{Z_p} = \frac{18.7476}{0.00040625} = 4614.7938 \, \text{inch-lbs}
+\]
+
+Finally, solve for \(Z\):
+
+\[
+Z = \frac{L_a \cdot \tau}{\sigma} = \frac{12 \cdot 4614.7938}{15000} = 3.6918 \, \text{inch}^3
+\]
+
+Determine the minimum bar size:
+
+\[
+a = \sqrt[3]{Z \cdot 6} = \sqrt[3]{3.6918 \cdot 6} = \sqrt[3]{22.1508} = 2.8084 \, \text{inches}
+\]
+
+This result appears incorrect due to ambiguities in defining \(a\). Further adjustments to calculations are necessary, as detailed in subsequent sections.
+
+\subsection*{Final Derived Equations}
+\[
+\tau = \text{nm} \cdot 0.7376
+\]
+
+\[
+P = \frac{\tau \cdot N}{5252}
+\]
+
+\[
+S_w = \frac{S_m}{f_s}
+\]
+
+\[
+\sigma = \frac{S_w}{K_t}
+\]
+
+\[
+T = \frac{63000P}{N}
+\]
+
+\[
+Z_p = 0.208a_{\text{initial}}^3 \cdot S_s
+\]
+
+\[
+\tau = \frac{T}{Z_p}
+\]
+
+\[
+Z = \frac{L_a \cdot \tau}{\sigma}
+\]
+
+\[
+a_{\text{final}} = \sqrt[3]{Z \cdot 6}
+\]
+
+The test has succeeded. This framework allows us to accurately determine whether an axle will fail or succeed based on input parameters.
