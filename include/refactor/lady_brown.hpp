@@ -21,6 +21,8 @@ class Lady_Brown {
 
         pros::Color slot_1_color, slot_2_color;
 
+        bool use_bang_bang = false;
+
     private:
     pros::Motor* motor;
     lemlib::PID* pid;
