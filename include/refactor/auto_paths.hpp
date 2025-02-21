@@ -2,7 +2,6 @@
 
 #include "constructors.hpp"
 #include "dimentions.hpp"
-#include "op_control.hpp"
 
 using namespace dimensions::all;
 
@@ -146,29 +145,32 @@ ASSET(two_txt);
 ASSET(three_txt);
 ASSET(four_txt);
 
+Lady_Brown::position* pose;
+
+void lb_auto_task () {
+    while (1) {
+        lady_brown.move_to_position(pose);
+        pros::delay(20);
+    }
+}
+
 void skills () {
     chassis.setPose(-62.7, -4.9, 90);
-    pros::Task lb_task(lady_brown_intake_task);
-    lady_brown.move_to_position(hold);
+    pros::Task lb_task(lb_auto_task);
+    pose = &hold;
     intake.move_upper();
     pros::delay(500);
-    chassis.moveToPoint(-TILE * 2, 0, 5000, {.minSpeed=31, .earlyExitRange=3}, false);
+    chassis.moveToPoint(-TILE * 2, -4.9, 5000, {.minSpeed=31, .earlyExitRange=3}, false);
     intake.stop();
     mogo_mech_piston.retract();
     chassis.turnToHeading(REFEREE, 500);
     chassis.moveToPose(-TILE * 2, -TILE + MOGO_FLATEDGE, REFEREE, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=1});
-    chassis.moveToPose(-24 * 2, -TILE, REFEREE, 2000, {.forwards=false, .maxSpeed=31}, false);
+    chassis.moveToPose(-24 * 2, -24, REFEREE, 2000, {.forwards=false, .maxSpeed=72}, false);
     pros::delay(500);
     mogo_mech_piston.extend();
     pros::delay(250);
     chassis.turnToPoint(-TILE, -TILE, 500);
     intake.move();
-    //chassis.moveToPoint(-TILE, -TILE, 2000, {.minSpeed=1, .earlyExitRange=1});
-    //chassis.moveToPoint(0, -TILE * 2, 5000, {.minSpeed=16, .earlyExitRange=3});
-    //chassis.moveToPoint(TILE, -TILE * 2, 5000, {.minSpeed=1, .earlyExitRange=1});
-    //chassis.turnToPoint(0, -TILE * 2.5, 500);
-    //chassis.moveToPose(0, -TILE * 2.5, RED_STATION, 5000, {.minSpeed=16, .earlyExitRange=1});
-    //chassis.moveToPose(-TILE, -TILE * 2, RED_STATION, 5000, {.minSpeed=16, .earlyExitRange=1});
     chassis.follow(one_txt, 6, 15000);
     chassis.moveToPoint(-TILE * 2, -TILE * 2, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=.5});
     chassis.turnToPoint(-TILE * 2, -TILE * 2.5 + DRIVE_LENGTH / 2 - RING / 2, 500, {}, false);
@@ -180,13 +182,13 @@ void skills () {
     mogo_mech_piston.retract();
     chassis.moveToPoint(-TILE * 2, -TILE * 2, 2000, {.minSpeed=31, .earlyExitRange=3}, false);
     intake.move();
-    lady_brown.move_to_position(load);
+    pose = &load;
     chassis.moveToPoint(0, -42, 5000, {.minSpeed=31, .earlyExitRange=4});
     pros::delay(500);
     intake.stop();
-    lady_brown.move_to_position(score);
+    pose = &score;
     chassis.moveToPose(0, -TILE * 3 + DRIVE_LENGTH / 2, AUDIENCE, 5000, {.minSpeed=1, .earlyExitRange=3}, false);
-    lady_brown.move_to_position(hold);
+    pose = &hold;
     chassis.moveToPoint(0, -TILE * 2, 2000, {.forwards=false, .minSpeed=16, .earlyExitRange=2});
     chassis.turnToPoint(TILE, -TILE, 500);
     chassis.moveToPoint(TILE, -TILE, 5000, {.minSpeed=15, .earlyExitRange=2});
@@ -204,17 +206,17 @@ void skills () {
     chassis.moveToPoint(-TILE * 2, TILE * 2, 2000, {.forwards=false, .minSpeed=1, .earlyExitRange=1});
     chassis.turnToPoint(-TILE * 2, TILE * 2.5, 500);
     chassis.moveToPoint(-TILE * 2, TILE * 2.5 - DRIVE_LENGTH / 2 + RING / 2, 2000, {.minSpeed=1, .earlyExitRange=1}, false);
-    lady_brown.move_to_position(load);
+    pose = &load;
     chassis.moveToPoint(-TILE * 2, TILE * 2, 2000, {.forwards=false, .minSpeed=1, .earlyExitRange=2});
     chassis.turnToHeading(135, 500);
     chassis.moveToPose(-58, 58, 135, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=1}, false);
     mogo_mech_piston.retract();
     chassis.moveToPoint(-TILE * 2, TILE * 2, 2000, {.minSpeed=31, .earlyExitRange=3}, false);
     intake.stop_upper();
-    lady_brown.move_to_position(score);
+    pose = &score;
     chassis.moveToPoint(0, 42, 5000, {.minSpeed=31, .earlyExitRange=4});
     chassis.moveToPose(0, TILE * 3 - DRIVE_LENGTH / 2, REFEREE, 5000, {.minSpeed=1, .earlyExitRange=3}, false);
-    lady_brown.move_to_position(hold);
+    pose = &hold;
     intake.move();
     chassis.moveToPoint(0, TILE * 2, 2000, {.forwards=false, .minSpeed=16, .earlyExitRange=2});
     chassis.turnToHeading(90, 500);
