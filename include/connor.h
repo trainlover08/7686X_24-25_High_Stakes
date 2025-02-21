@@ -25,21 +25,21 @@ using namespace pros;
 #define lady_brown_load_macro 3530
 #define lady_brown_score_macro 2100
 
-#define drivetrain_lateral_p_gain 14.0 //P, I, D. Dont play with these right before match
+#define drivetrain_lateral_p_gain 5.0 //P, I, D. Dont play with these right before match
 #define drivetrain_lateral_i_gain 0.0
-#define drivetrain_lateral_d_gain 60.0
-#define drivetrain_angular_p_gain 4.0
-#define drivetrain_angular_i_gain 0.5
-#define drivetrain_angular_d_gain 30.0
-#define lb_ready_p_gain 0.8 //P, I, D for the lady brown controller
-#define lb_ready_i_gain 0.001
-#define lb_ready_d_gain 1.4
-#define lb_score_p_gain 0.10
-#define lb_score_i_gain 0
-#define lb_score_d_gain 0.6
-#define lb_return_p_gain 0.04
-#define lb_return_i_gain 0
-#define lb_return_d_gain 0.6
+#define drivetrain_lateral_d_gain 0.0
+#define drivetrain_angular_p_gain 2.0
+#define drivetrain_angular_i_gain 0.1
+#define drivetrain_angular_d_gain 22.0
+#define lb_ready_p_gain .25 //P, I, D for the lady brown controller
+#define lb_ready_i_gain 0
+#define lb_ready_d_gain 15
+#define lb_score_p_gain 2.5
+#define lb_score_i_gain .2
+#define lb_score_d_gain 15
+#define lb_return_p_gain .075
+#define lb_return_i_gain .01
+#define lb_return_d_gain 0.75
 
 #define drive_width 12.25 // 1. find the middle of the wheel (not the length, the thickness). 2. measure the the distance from the middle of the wheels on both sides.
 #define wheel_diameter 3.25

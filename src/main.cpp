@@ -26,13 +26,8 @@ void autonomous() {
 }
 
 void opcontrol () {
-    chassis.setPose(0, 0, 0);
-    while (1) {
-        //chassis.moveRelative(60, 5000);
-        //chassis.moveRelative(-60, 5000, true);
-        chassis.moveToPoint(0, 48, 5000);
-        chassis.moveToPoint(0, 0, 5000, {.forwards=false});
-    }
+    //skills();
+    chassis.setPose(-TILE * 2 - DRIVE_LENGTH / 2, -DRIVE_WIDTH / 2, 270);
     pros::Task auto_cancel(cancel_auto_motion);
     if (auto_ran) {
         if (selector.get_auton()->name == "Red Right") {

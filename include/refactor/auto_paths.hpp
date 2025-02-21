@@ -2,6 +2,7 @@
 
 #include "constructors.hpp"
 #include "dimentions.hpp"
+#include "op_control.hpp"
 
 using namespace dimensions::all;
 
@@ -146,7 +147,7 @@ ASSET(three_txt);
 ASSET(four_txt);
 
 void skills () {
-    chassis.setPose(0, 0, 0);
+    chassis.setPose(-62.7, -4.9, 90);
     pros::Task lb_task(lady_brown_intake_task);
     lady_brown.move_to_position(hold);
     intake.move_upper();
@@ -155,14 +156,20 @@ void skills () {
     intake.stop();
     mogo_mech_piston.retract();
     chassis.turnToHeading(REFEREE, 500);
-    chassis.moveToPose(-TILE * 2 + MOGO_FLATEDGE, -TILE, REFEREE, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=1});
-    chassis.moveToPose(-TILE * 2, -TILE, REFEREE, 2000, {.forwards=false, .maxSpeed=31, .minSpeed=1, .earlyExitRange=1}, false);
+    chassis.moveToPose(-TILE * 2, -TILE + MOGO_FLATEDGE, REFEREE, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=1});
+    chassis.moveToPose(-24 * 2, -TILE, REFEREE, 2000, {.forwards=false, .maxSpeed=31}, false);
     pros::delay(500);
     mogo_mech_piston.extend();
     pros::delay(250);
     chassis.turnToPoint(-TILE, -TILE, 500);
     intake.move();
-    chassis.follow(one_txt, 15, 15000);
+    //chassis.moveToPoint(-TILE, -TILE, 2000, {.minSpeed=1, .earlyExitRange=1});
+    //chassis.moveToPoint(0, -TILE * 2, 5000, {.minSpeed=16, .earlyExitRange=3});
+    //chassis.moveToPoint(TILE, -TILE * 2, 5000, {.minSpeed=1, .earlyExitRange=1});
+    //chassis.turnToPoint(0, -TILE * 2.5, 500);
+    //chassis.moveToPose(0, -TILE * 2.5, RED_STATION, 5000, {.minSpeed=16, .earlyExitRange=1});
+    //chassis.moveToPose(-TILE, -TILE * 2, RED_STATION, 5000, {.minSpeed=16, .earlyExitRange=1});
+    chassis.follow(one_txt, 6, 15000);
     chassis.moveToPoint(-TILE * 2, -TILE * 2, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=.5});
     chassis.turnToPoint(-TILE * 2, -TILE * 2.5 + DRIVE_LENGTH / 2 - RING / 2, 500, {}, false);
     intake.stop_upper();
@@ -227,7 +234,7 @@ void skills () {
     chassis.moveToPoint(TILE * 2, -TILE * 2, 2000, {.forwards=false, .minSpeed=1, .earlyExitRange=1});
     upper_intake_motor.move_relative(360 * 3, 100);
     intake.stop();
-    chassis.follow(four_txt, 15, 10000, true, false);
+    chassis.follow(four_txt, 24, 10000, true, false);
     intake.move_upper();
     pros::delay(750);
     chassis.moveRelative(6, 1000);

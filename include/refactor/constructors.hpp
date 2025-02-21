@@ -39,7 +39,7 @@ lemlib::ControllerSettings lateral_controller(
     100,                                           //small error timeout (ms)
     3,                                           //large error range (inches)
     500,                                           //large error timeout (ms)
-    0                                            //slew (m/s^2)
+    5                                            //slew (m/s^2)
 );
 
 lemlib::ControllerSettings angular_controller(

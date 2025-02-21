@@ -24,14 +24,16 @@ void intake_task () {
 }
 
 void ui_task () {
-    std::string x_str = "X: " + std::to_string(chassis.getPose().x);
-    std::string y_str = "Y: " + std::to_string(chassis.getPose().y);
-    std::string t_str = "Theta: " + std::to_string(chassis.getPose().theta);
-    console.clear();
-    console.println(x_str);
-    console.println(y_str);
-    console.println(t_str);
-    pros::delay(50);
+    while (1) {
+        std::string x_str = "X: " + std::to_string(chassis.getPose().x);
+        std::string y_str = "Y: " + std::to_string(chassis.getPose().y);
+        std::string t_str = "Theta: " + std::to_string(chassis.getPose().theta);
+        console.clear();
+        console.println(x_str);
+        console.println(y_str);
+        console.println(t_str);
+        pros::delay(50);
+    }
 }
 
 void drive_task () {
@@ -72,6 +74,7 @@ void misc_task () {
 
 void lady_brown_intake_task () {
     Lady_Brown::position* pose = &hold;
+    lady_brown_rotation.calibrate();
     while (1) {
         if (lb_down_button.is_pressing()) {
             pose = pose->angle == hold.angle ? pose = &load : pose->angle == load.angle ? pose = &score :  pose = &hold;
