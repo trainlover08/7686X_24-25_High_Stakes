@@ -2,6 +2,7 @@
 #include "refactor/op_control.hpp"
 #include "refactor/auto_control.hpp"
 #include "main.h"
+#include "experimental/filter_test.hpp"
 
 bool auto_ran = 0;
 
@@ -41,4 +42,5 @@ void opcontrol () {
     pros::Task ui_task_opcontrol (ui_task);
     pros::Task misc_task_opcontrol (misc_task);
     pros::Task lady_brown_intake_task_opcontrol (lady_brown_intake_task);
+    pros::Task mcl_task (localize);
 }

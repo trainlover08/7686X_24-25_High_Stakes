@@ -104,3 +104,5 @@ Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_retur
 Lady_Brown::position hold({.angle=lady_brown_ready_macro, .pid=&lady_brown_return_controller});
 Lady_Brown::position load({.angle=lady_brown_load_macro, .pid=&lady_brown_ready_controller});
 Lady_Brown::position score({.angle=lady_brown_score_macro, .pid=&lady_brown_score_controller});
+
+lemlib::Pose chassis_pose = chassis.getPose();
