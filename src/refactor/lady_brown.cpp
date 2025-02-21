@@ -14,7 +14,7 @@ void Lady_Brown::move_to_position (const Lady_Brown::position& pos) {
 
 void Lady_Brown::move_to_position (const Lady_Brown::position* pos) {
     double error = pos->angle - this->rotation->get_value();
-    if (this->use_bang_bang) {
+    if (!this->use_bang_bang) {
         double output = this->pid->update(error);
         this->motor->move(output - 10);
     } else {
