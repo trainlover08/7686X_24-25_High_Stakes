@@ -1,0 +1,309 @@
+% !TEX root = main.tex
+\documentclass[oneside]{book}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{indentfirst}
+\usepackage{graphicx}
+\usepackage{soul}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{titling}
+\usepackage{etoolbox} 
+\usepackage[utf8]{inputenc}
+\usepackage{changepage}
+\usepackage{tocloft}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage[table]{xcolor}
+\usepackage{ragged2e}
+\usepackage{pgfgantt}
+\usepackage{float}
+\usepackage{lipsum}
+\usepackage[export]{adjustbox}
+\usepackage[normalem]{ulem}
+\usetikzlibrary{calendar}
+\usepackage{array}
+\usepackage{authblk}
+\usepackage{pgfcalendar}
+\usetikzlibrary{calendar}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{geometry}
+\usepackage{gensymb}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{censor}
+\usepackage{url}
+\usepackage{media9}
+\usepackage{fancyhdr}
+\usepackage[nottoc,numbib]{tocbibind}
+\usepackage[backend=biber, style=authoryear, sorting=nty]{biblatex}
+\addbibresource{references.bib}
+\usepackage[unicode, bookmarks=false]{hyperref}
+\usepackage{hyperref} %\href{http://www.example.com}{Example Website}
+\nocite{*}
+\geometry{left=2cm,right=2cm,top=2cm,bottom=2cm} % Adjust margins
+% Define the C++ style
+\lstset{
+    language=C++,              
+    basicstyle=\ttfamily,      
+    keywordstyle=\color{blue}, 
+    commentstyle=\color{green},
+    stringstyle=\color{red},   
+    numbers=left,              
+    numberstyle=\tiny,         
+    stepnumber=1,              
+    tabsize=4,                 
+    breaklines=true,           
+    frame=single,              
+    showspaces=false,          
+    showstringspaces=false,    
+    showtabs=false,            
+    captionpos=b,              
+    escapeinside={(*@}{@*)},   
+    backgroundcolor=\color{gray!10}, 
+}
+%CPP minted highlighting
+\lstset{ 
+    language=C++,            % Choose the language
+    basicstyle=\ttfamily,    % Font style
+    keywordstyle=\color{blue}, % Keywords in blue
+    commentstyle=\color{green}, % Comments in green
+    stringstyle=\color{red},  % Strings in red
+    numbers=left,            % Line numbers on the left
+    numberstyle=\tiny,       % Style of the line numbers
+    stepnumber=1,           % Line numbers increment
+    tabsize=4,              % Size of tabs
+    breaklines=true,         % Automatic line breaking
+}
+% MLA style header
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage} % Center page number in the footer
+
+% Command to set author, title, and date dynamically per chapter
+\newcommand{\info}[3]{%
+  \fancyhead[L]{\makebox[\dimexpr\textwidth-2cm\relax][l]{#1 \hfill #2 \hfill #3}} % Extend across the page
+}
+
+% Custom chapter command that does not start a new page
+\newcommand{\customchapter}[3]{%
+  \setchapterinfo{#1}{#2}{#3} % Update header with author, title, date
+  \chaptermark{#3} % Update chapter mark for TOC
+  \addcontentsline{toc}{chapter}{\chaptername~\thechapter\quad #3} % Add entry to TOC
+  \noindent\textbf{\LARGE #3} % Display chapter title without starting a new page
+  \vspace{1em} % Optional space after the title
+}
+
+% Patch \chapter command to not start a new page
+\patchcmd{\chapter}{\clearpage}{}{}{}
+
+\setcounter{tocdepth}{0}
+
+\newcommand{\definecolortransparent}[4]{%
+    \definecolor{#1}{rgb}{#2}%
+    \tikzset{#1/.style={fill=#1, fill opacity=#4}}%
+}
+
+\newcommand{\transparentcolor}[2]{\color{#1}\transparent{0.5}#2\transparent{1}}
+
+% Define custom colors for chapter backgrounds
+\definecolor{Red}{rgb}{1, 0, 0} % Red
+\definecolor{Green}{rgb}{0, 1, 0} % Green
+\definecolor{Blue}{rgb}{0, 0, 1} % Blue
+\definecolor{Highlighter}{rgb}{1, 1, 0.2} % Light Yellow
+\definecolor{Cyan}{rgb}{0, 1, 1} % Cyan
+\definecolor{Magenta}{rgb}{1, 0, 1} % Magenta
+\definecolor{White}{rgb}{1, 1, 1} % White
+\definecolor{Black}{rgb}{0, 0, 0} % Black
+\definecolor{Analysis}{rgb}{1, 0.8, 0.9} % Light pink
+\definecolor{Identify}{rgb}{1, 0.5, 0.5} % Lighter red
+\definecolor{Brainstorm}{rgb}{1, 0.75, 0.5}  % Lighter orange
+\definecolor{Solution}{rgb}{1, 1, 0.5}  % Lighter yellow
+\definecolor{Build}{rgb}{0, 1, 0.5} % Lighter green
+\definecolor{Test}{rgb}{0, .5, 1} % Lighter blue
+\definecolor{Repeat}{RGB}{153,51,255}
+
+%Hyperlink the bib to the TOC
+\newcommand{\tocbib}[1]{%
+  \phantomsection
+  \addcontentsline{toc}{section}{#1}
+  \bibliography{#1}
+}
+
+% Custom commands to highlight TOC entries with a fully colored box off to the side
+\newcommand{\toccolorbox}[2]{%
+  \makebox[0pt][r]{\colorbox{#1}{\phantom{0}}}%
+  \hspace{1em} #2
+}
+
+\newcommand{\identify}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Identify}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\brainstorm}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Brainstorm}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\solution}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Solution}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\build}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Build}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\test}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Test}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\repeatcustom}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Repeat}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\white}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{white}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\analysis}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Analysis}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\newcommand{\important}[1]{%
+  \refstepcounter{chapter} % Increment the chapter counter
+  \chapter*{#1}
+  \addcontentsline{toc}{chapter}{\texorpdfstring{\toccolorbox{Highlighter}{\textcolor{black}{\bfseries \chaptername~\thechapter\quad #1}}}{\chaptername~\thechapter\quad #1}}%
+  \chaptermark{#1}
+}
+
+\makeatletter
+\newcommand{\chapterauthor}[1]{%
+  {\parindent0pt\vspace*{-25pt}%
+  \linespread{1.1}\large\scshape#1%
+  \par\nobreak\vspace*{35pt}}
+  \@afterheading%
+}
+\makeatother
+\patchcmd{\chapter}{\clearpage}{}{}{} % Patch \chapter command to not start a new page
+
+\newcommand{\cross}{
+    \begin{tikzpicture}
+        \draw[thick] (0,0) -- (1,1);
+        \draw[thick] (0,1) -- (1,0);
+    \end{tikzpicture}
+}
+
+% Redefine \maketitle to suppress page break
+\makeatletter
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    \includegraphics[width=0.8\textwidth]{images/Phoenix_Logo_Black.png} \par
+    \vspace*{2cm}
+    {\Huge\bfseries\@title\par}
+    \vspace*{1cm}
+    {\Large\@author\par}
+    \vspace*{1cm}
+    {\large\@date\par}
+    \vfill
+  \end{titlepage}
+}
+\makeatother
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,     
+    urlcolor=cyan,
+    citecolor=cyan,        % Color of citation links
+}
+\newcommand{\vexManual}{\textit{VEX High Stakes Game Manual} "\cite{vexHighStakesManual}"}
+\newcommand{\vex}{\textit{VEX Website} "\cite{vexRobotics}"}
+\newcommand{\machinists}{\textit{Machinery’s Handbook} "\cite{machinists}."}
+\setlength{\parindent}{2em} % Sets paragraph indentation to 2em
+\newcommand{\blueref}[2]{\hyperref[#1]{\textcolor{black}{\underline{\textcolor{blue}{#2}}}}}
+
+\includeonly{Robot V2.0 EDP/DriveEDPV2.0} %just replace the file and once you compile it will only compile that file
+
+\begin{document}
+
+\RaggedRight
+\let\cleardoublepage\clearpage 
+
+\title{Phoenix Rising 7686X 2024-2025 VEX Notebook}
+\author{Caleb Bachmeier}
+\date{May 1, 2024}
+\maketitle
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+
+\include{Preseason/Planning,Edp,Setup} %May 1
+\tableofcontents
+\include{Preseason/Bios-Skills} %May 14 
+\include{Programming/Programming} %May17
+\include{Preseason/Pnuematics-BotIdea2} %May 22
+\include{Robot V1.0 EDP/DriveEDPV1.0} %June 8
+\include{Robot V1.0 EDP/MoGoEDPV1.0} %June 25
+\include{Preseason/Analysis-Analysis} %July 4
+\include{Robot V1.0 EDP/IntakeEDPV1.0} %July 22
+\include{Robot V1.0 EDP/IntakeEDPV1.1} %July 27
+\include{Robot V1.0 EDP/ArmEDPV1.0} %September 1
+\include{Preseason/August6-Auton} %September 6
+\include{Robot V1.0 EDP/ArmEDPV1.1} %September 30
+\include{Preseason/Predouglas-Douglas} %October 16
+\include{AI/Simulation} %October 18
+\include{Post Douglas/Douglas Overview} %October 26
+\include{Post ND/ND Overview} %November 2
+\include{Post ND/INPROGRESS} %November 18
+\include{Robot V1.0 EDP/MoGoEDPV1.1}
+\include{Post Mitchell/Mitchell + NH}
+\include{AI/AIImprovments}
+\include{Machining/Screw Strengths}
+
+\include{Robot V2.0 EDP/DriveEDPV2.0}
+\include{Robot V2.0 EDP/MoGoEDPV2.0}
+\include{Robot V2.0 EDP/IntakeEDPV2.0}
+\include{Robot V2.0 EDP/ArmEDPV2.0}
+
+\include{Programming/Robot2.0}
+\printbibliography
+%Appendix A
+\include{Appendix/Appendix_A/AI} %May 19
+\include{Appendix/Appendix_A/AIImprovments}%December 
+\begin{comment}
+%Appendix B
+\input{Appendix/Appendix_B/Preamble}
+\input{Appendix/Appendix_B/Ians _Code/AI}
+\input{Appendix/Appendix_B/Jaydens_Code/Simulation}
+\input{Appendix/Appendix_B/Ians _Code/1-14Code}
+\end{comment}
+\end{document}
