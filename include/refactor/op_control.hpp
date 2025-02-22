@@ -78,6 +78,7 @@ void lady_brown_intake_task () {
     while (1) {
         if (lb_down_button.is_pressing()) {
             pose = pose->angle == hold.angle ? pose = &load : pose->angle == load.angle ? pose = &score :  pose = &hold;
+            if (pose->angle == load.angle) {lady_brown.use_bang_bang = true;} else {lady_brown.use_bang_bang = false;}
             while (lb_down_button.is_pressing()) pros::delay(10);
         }
         lady_brown.move_to_position(pose);
