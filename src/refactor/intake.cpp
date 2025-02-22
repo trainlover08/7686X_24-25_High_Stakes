@@ -1,12 +1,13 @@
 #include "refactor/intake.hpp"
-#include "pros/abstract_motor.hpp"
+#include "pros/adi.hpp"
 #include <cmath>
 
-Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort* lower_sort, pros::Rotation* rotation) {
+Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, Color_Sort* lower_sort, pros::Rotation* rotation) {
      this->lower_intake = lower_intake;
      this->upper_intake = upper_intake;
      this->lower_sort = lower_sort;
      this->rotation = rotation;
+     this->raiser = raiser;
      for (int i = 0; i < hook_poses.size(); ++i) {
           hook_poses[i] = (this->chain_length / hook_poses.size()) * i;
           hook_poses[i] += this->convert_angle_to_length(this->rotation->get_position());
@@ -14,9 +15,10 @@ Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort*
      this->pid = new lemlib::PID (this->kP, this->kI, this->kD);
 }
 
-Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake) {
+Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser) {
      this->lower_intake = lower_intake;
      this->upper_intake = upper_intake;
+     this->raiser = raiser;
      this->lower_sort = nullptr;
 }
 
@@ -172,3 +174,6 @@ void Intake::sort_ring () {
      this->move_hook_to_ready();
 }
 
+void Intake::raise_intake (bool extend) {
+     this->raiser->set_value(extend);
+}

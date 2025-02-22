@@ -15,6 +15,7 @@ using namespace pros;
 
 #define mogo_mech_port 'G' // make sure digital ports have a set of '' or are of type char
 #define doinker_port 'D'
+#define intake_piston_port 'E'
 
 #define vertical_odom_pod_rotation_sensor 9
 #define lady_brown_pot 'H'
