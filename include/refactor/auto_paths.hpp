@@ -294,25 +294,26 @@ void goal_rush () {
     mogo_mech_piston.retract();
     chassis.turnToHeading(430.6, 100);
     intake.move_lower();
-    chassis.moveToPoint(-15.7, -48.8, 5000, {.minSpeed=1, .earlyExitRange=.5}, false);
+    chassis.moveToPoint(-15.7, -48.8, 5000, {.maxSpeed=72,.minSpeed=1, .earlyExitRange=.5}, false);
     doinker_piston.extend();
-    chassis.moveToPoint(-27.0, -51.9, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=1}, false);
+    pros::delay(100);
+    chassis.moveToPoint(-27.0, -51.9, 5000, {.forwards=false, .maxSpeed=72, .minSpeed=1, .earlyExitRange=1}, false);
     doinker_piston.retract();
     chassis.turnToHeading(255, 1000);
-    chassis.moveToPoint(-19.9, -52.2, 1000, {}, false);
+    chassis.moveToPoint(-19.9, -52.2, 1000, {.maxSpeed=72}, false);
     pros::delay(250);
     mogo_mech_piston.extend();
     pros::delay(500);
-    chassis.moveToPose(-26.9, -47.8, 116, 2000, {.forwards=false}, true);
+    chassis.moveToPose(-26.9, -47.8, 116, 2000, {.forwards=false, .maxSpeed=72}, true);
     upper_intake_motor.move_relative(360 * 2, 600);
     chassis.moveToPoint(-21.0, -50.0, 2000);
     mogo_mech_piston.retract();
     chassis.turnToHeading(180, 500);
-    chassis.moveToPoint(-24.0, -24.0, 2000, {.forwards=false, .maxSpeed=72}, false);
+    chassis.moveToPoint(-24.0, -24.0, 2000, {.forwards=false, .maxSpeed=72}, false); // do not change speed back
     pros::delay(250);
     mogo_mech_piston.extend();
     pros::delay(500);
-    chassis.moveToPose(-11.8, -59.0, 90, 2000);
+    chassis.moveToPose(-11.8, -59.0, 90, 2000, {.maxSpeed=72}, true);
     intake.stop_lower();
     intake.move_upper();
 }
