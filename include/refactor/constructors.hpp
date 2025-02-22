@@ -18,6 +18,7 @@ pros::Motor lady_brown_motor(lady_brown_motor_port, pros::MotorCart::blue);
 
 pros::adi::Pneumatics mogo_mech_piston(mogo_mech_port, true);
 pros::adi::Pneumatics doinker_piston(doinker_port, false);
+pros::adi::Pneumatics intake_piston(intake_piston_port, true);
 
 pros::Rotation vertical_tracking_wheel(vertical_odom_pod_rotation_sensor);
 pros::adi::Potentiometer lady_brown_rotation(lady_brown_pot);
@@ -99,7 +100,7 @@ Mapable_Controller::Button_Combo doinker_button_combo (main_controller.controlle
 Mapable_Controller::Button_Combo lb_down_button (main_controller.controller, {lady_brown_down_button});
 Mapable_Controller::Button_Combo lb_que_button (main_controller.controller, {lady_brown_que_button});
 
-Intake intake(&lower_intake_motor, &upper_intake_motor);
+Intake intake(&lower_intake_motor, &upper_intake_motor, &intake_piston);
 Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_return_controller);
 Lady_Brown::position hold({.angle=lady_brown_ready_macro, .pid=&lady_brown_return_controller});
 Lady_Brown::position load({.angle=lady_brown_load_macro, .pid=&lady_brown_ready_controller});
