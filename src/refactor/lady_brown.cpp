@@ -13,22 +13,7 @@ void Lady_Brown::move_to_position (const Lady_Brown::position& pos) {
 }
 
 void Lady_Brown::move_to_position (const Lady_Brown::position* pos) {
-    double error = pos->angle - this->rotation->get_value();
-    if (!this->use_bang_bang) {
-        double output = this->pid->update(error);
-        this->motor->move(output - 10);
-    } else {
-        if (error < -50) {
-            this->motor->move_velocity(-5);
-        } else if (error > 50) {
-            this->motor->move_velocity(50);
-        } else {
-            this->motor->move_velocity(0);
-        }
-    }
-    if (error > -10 && error < 10) {
-        this->motor->move_velocity(0);
-    }
+    this->motor->move_absolute(pos->angle, 200);
 }
 
 bool Lady_Brown::is_at_position (const Lady_Brown::position& pos) {
