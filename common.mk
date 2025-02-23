@@ -3,7 +3,7 @@ DEVICE=VEX EDR V5
 
 MFLAGS=-mcpu=cortex-a9 -mfpu=neon-fp16 -mfloat-abi=softfp -Os -g
 CPPFLAGS=-D_POSIX_THREADS -D_UNIX98_THREAD_MUTEX_ATTRIBUTES -D_POSIX_TIMERS -D_POSIX_MONOTONIC_CLOCK
-GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables -I ../../rltools/rl-tools/include
+GCCFLAGS=-ffunction-sections -fdata-sections -fdiagnostics-color -funwind-tables
 
 # Check if the llemu files in libvgl exist. If they do, define macros that the
 # llemu headers in the kernel repo can use to conditionally include the libvgl
