@@ -4,14 +4,15 @@
 #include "pros/distance.hpp"
 #include "pros/colors.hpp"
 #include "pros/motors.hpp"
+#include "pros/adi.hpp"
 #include "color_sort.hpp"
 #include "lemlib/pid.hpp"
 #include <vector>
 
 class Intake {
 public:
-    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, Color_Sort* lower_sort, pros::Rotation* rotation);
-    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake);
+    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, Color_Sort* lower_sort, pros::Rotation* rotation);
+    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser);
 
     void move();
     void move(bool reverse);
@@ -26,6 +27,8 @@ public:
     void stop_lower();
     void stop_upper();
     void lb_relief();
+
+    void raise_intake (bool extend);
 
     std::vector<double> hook_poses {0, 0, 0};
     void move_hook_to_ready();
@@ -48,6 +51,7 @@ public:
     pros::Color *lower_color;
     pros::Motor* lower_intake;
     pros::Motor* upper_intake;
+    pros::adi::Pneumatics* raiser;
     Color_Sort* lower_sort;
     Color_Sort* upper_sort;
     pros::Mutex mutex;
