@@ -22,16 +22,16 @@ using namespace pros;
 
 #define imu_port 2
 
-#define lady_brown_ready_macro 3750
-#define lady_brown_load_macro 3580
-#define lady_brown_score_macro 2100
+#define lady_brown_ready_macro 3850
+#define lady_brown_load_macro 15
+#define lady_brown_score_macro 180
 
 #define drivetrain_lateral_p_gain 10.0 //P, I, D. Dont play with these right before match
 #define drivetrain_lateral_i_gain 0.0
-#define drivetrain_lateral_d_gain 60.0
+#define drivetrain_lateral_d_gain 70.0
 #define drivetrain_angular_p_gain 2.0
 #define drivetrain_angular_i_gain 0.1
-#define drivetrain_angular_d_gain 26.0
+#define drivetrain_angular_d_gain 28.0
 #define lb_ready_p_gain 0.00 //P, I, D for the lady brown controller
 #define lb_ready_i_gain 0.0
 #define lb_ready_d_gain 0.100

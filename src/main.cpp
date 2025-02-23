@@ -28,7 +28,8 @@ void autonomous() {
 
 void opcontrol () {
     //chassis.setPose(-55.2, 46.9, 90);
-    awp();
+    //awp_red();
+    awp_blue();
     //chassis.setPose(-54.2, -62.0, 90);
     //goal_rush();
     //chassis.setPose(-TILE * 2 - DRIVE_LENGTH / 2, -DRIVE_WIDTH / 2, 270);

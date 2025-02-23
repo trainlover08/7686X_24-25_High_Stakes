@@ -76,12 +76,15 @@ void lady_brown_intake_task () {
     Lady_Brown::position* pose = &hold;
     lady_brown_rotation.calibrate();
     while (1) {
-        if (lb_down_button.is_pressing()) {
-            pose = pose->angle == hold.angle ? pose = &load : pose->angle == load.angle ? pose = &score :  pose = &hold;
-            if (pose->angle == load.angle) {lady_brown.use_bang_bang = true;} else {lady_brown.use_bang_bang = false;}
-            while (lb_down_button.is_pressing()) pros::delay(10);
+        if (master.get_digital(b_button)) {
+            lady_brown_motor.move_velocity(200);
+        } else if (master.get_digital(y_button)) {
+            lady_brown_motor.move_velocity(-200);
+        } else if (master.get_digital(lady_brown_down_button)) {
+        
+        } else {
+            lady_brown_motor.move_velocity(0);
         }
-        lady_brown.move_to_position(pose);
         pros::delay(10);
     }
 }

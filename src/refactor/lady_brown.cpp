@@ -16,7 +16,11 @@ void Lady_Brown::move_to_position (const Lady_Brown::position& pos) {
 }
 
 void Lady_Brown::move_to_position (const Lady_Brown::position* pos) {
-    this->motor->move_absolute(pos->angle, 200);
+    double angle = 10.0;
+    while ((this->motor->get_position() > (angle + 1.0)) && (this->motor->get_position() < (angle - 1.0))) {
+        this->motor->move_absolute(angle, 200);
+        pros::delay(10);
+    }
 }
 
 bool Lady_Brown::is_at_position (const Lady_Brown::position& pos) {
