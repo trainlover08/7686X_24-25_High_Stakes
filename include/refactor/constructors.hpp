@@ -18,7 +18,7 @@ pros::Motor lady_brown_motor(lady_brown_motor_port, pros::MotorCart::blue);
 
 pros::adi::Pneumatics mogo_mech_piston(mogo_mech_port, true);
 pros::adi::Pneumatics doinker_piston(doinker_port, false);
-pros::adi::Pneumatics intake_piston(intake_piston_port, true);
+pros::adi::Pneumatics intake_piston(intake_piston_port, false);
 
 pros::Rotation vertical_tracking_wheel(vertical_odom_pod_rotation_sensor);
 pros::adi::Potentiometer lady_brown_rotation(lady_brown_pot);

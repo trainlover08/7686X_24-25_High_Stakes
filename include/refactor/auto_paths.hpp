@@ -251,20 +251,22 @@ void awp () {
     mogo_mech_piston.retract();
     chassis.moveToPose(-23.5, 46.2, 90, 5000, {.minSpeed=1, .earlyExitRange=1}, false);
     pros::delay(250);
-    intake.stop();
     chassis.turnToHeading(0, 500);
     chassis.moveToPose(-23.5, 30.4, 0, 1000, {.forwards=false, .minSpeed=1, .earlyExitRange=1}, false);
     pros::delay(250);
     mogo_mech_piston.extend();
     pros::delay(500);
     chassis.turnToPoint(-42.5, 6.3, 500, {}, true);
-    // intake.raise();
     upper_intake_motor.move_relative(360 * 2.5, 600);
-    chassis.moveToPose(-42.5, 6.3, -141.6, 1500, {.minSpeed=1, .earlyExitRange=.5}, false);
-    // intake.drop();
-    lower_intake_motor.move_relative(360, 200);
-    chassis.moveToPose(-45.0, 4.2, -133.0, 1000, {.minSpeed=1, .earlyExitRange=.5}, false);
+    chassis.moveToPoint( -38.0, 18.35, 2000, {.minSpeed=1, .earlyExitRange=1}, false);
+    intake.raise_intake(true);
+    chassis.moveToPose(-43.5, 6.3, -141.6, 1500, {.minSpeed=1, .earlyExitRange=.5}, false);
+    intake.raise_intake(false);
+    lower_intake_motor.move_relative(360 * 4, 200);
+    pros::delay(250);
+    chassis.moveToPose(-48.0, 1.2, -133.0, 1000, {.minSpeed=1, .earlyExitRange=.5}, false);
     doinker_piston.extend();
+    pros::delay(250);
     chassis.turnToHeading(-344, 500, {}, false);
     doinker_piston.retract();
     chassis.moveToPoint(-48.4, -6.4, 1000, {.forwards=false}, false);
@@ -284,8 +286,9 @@ void awp () {
     chassis.turnToPoint(-17.3, 34.7, 500, {.forwards=false}, true);
     intake.move_upper();
     intake.move_lower();
-    chassis.moveToPose(-24.7, -45.6, -182, 2000, {}, false);
-    intake.move_lower();
+    chassis.moveToPose(-24.7, -53.6, -182, 2000, {.minSpeed=1, .earlyExitRange=1}, false);
+    intake.move_lower(-100);
+    chassis.moveToPoint(-12, -DRIVE_LENGTH / 2 - statics::LADDER_BASE / 2 + 1, 5000, {.forwards=false}, true);
     
 }
 
@@ -294,26 +297,26 @@ void goal_rush () {
     mogo_mech_piston.retract();
     chassis.turnToHeading(430.6, 100);
     intake.move_lower();
-    chassis.moveToPoint(-15.7, -48.8, 5000, {.maxSpeed=72,.minSpeed=1, .earlyExitRange=.5}, false);
+    chassis.moveToPoint(-15.7, -48.8, 5000, {.minSpeed=1, .earlyExitRange=.5}, false);
     doinker_piston.extend();
-    pros::delay(100);
-    chassis.moveToPoint(-27.0, -51.9, 5000, {.forwards=false, .maxSpeed=72, .minSpeed=1, .earlyExitRange=1}, false);
+    chassis.moveToPoint(-31.0, -51.9, 5000, {.forwards=false, .minSpeed=1, .earlyExitRange=1}, false);
     doinker_piston.retract();
-    chassis.turnToHeading(255, 1000);
-    chassis.moveToPoint(-19.9, -52.2, 1000, {.maxSpeed=72}, false);
+    chassis.moveToPoint(-36.0, -51.9, 2000, {.minSpeed=1, .earlyExitRange=1}, true);
+    chassis.turnToHeading(250, 1000);
+    chassis.moveToPoint(-19.9, -52.2, 2000, {.forwards=false}, false);
     pros::delay(250);
     mogo_mech_piston.extend();
     pros::delay(500);
-    chassis.moveToPose(-26.9, -47.8, 116, 2000, {.forwards=false, .maxSpeed=72}, true);
+    chassis.moveToPose(-26.9, -47.8, 116, 2000, {.forwards=false}, true);
     upper_intake_motor.move_relative(360 * 2, 600);
-    chassis.moveToPoint(-21.0, -50.0, 2000);
+    chassis.moveToPoint(-26.0, -50.0, 2000);
     mogo_mech_piston.retract();
     chassis.turnToHeading(180, 500);
     chassis.moveToPoint(-24.0, -24.0, 2000, {.forwards=false, .maxSpeed=72}, false); // do not change speed back
     pros::delay(250);
     mogo_mech_piston.extend();
     pros::delay(500);
-    chassis.moveToPose(-11.8, -59.0, 90, 2000, {.maxSpeed=72}, true);
+    chassis.moveToPose(-11.8, -59.0, 80, 2000, {}, true);
     intake.stop_lower();
     intake.move_upper();
 }
