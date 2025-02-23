@@ -12,8 +12,8 @@ namespace lemlib {
         DriveCurve* throttleCurve = &defaultDriveCurve, 
         DriveCurve* steerCurve = &defaultDriveCurve);
 
-        void moveRelative (float distance, unsigned int timeout, bool reverse=0, bool async=1);
-        void turnRelative (float angle, unsigned int timeout, bool reverse=0, bool async=1);
+        void moveRelative (float distance, unsigned int timeout);
+        void turnRelative (float angle, unsigned int timeout, bool reverse=0);
 
         virtual ~Mod_Chassis() = default;
     };
