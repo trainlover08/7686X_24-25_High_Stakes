@@ -80,8 +80,11 @@ void lady_brown_intake_task () {
             lady_brown_motor.move_velocity(200);
         } else if (master.get_digital(lady_brown_up_button)) {
             lady_brown_motor.move_velocity(-200);
-        } else if (master.get_digital(lady_brown_down_button_fake)) {
-        
+        } else if (master.get_digital(lady_brown_load_button)) {
+            double kP = lady_brown_p;
+            double error = lady_brown_load_position - lady_brown_rotation.get_angle();
+            double velocity = kP * error;
+            lady_brown_motor.move(velocity);
         } else {
             lady_brown_motor.move_velocity(0);
         }
