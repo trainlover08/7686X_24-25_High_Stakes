@@ -3,30 +3,30 @@
 using namespace pros; 
 
 // change the values after #define. should be self explanitory
-#define front_left_drive_motor -3
+#define front_left_drive_motor -13
 #define middle_left_drive_motor -14
-#define back_left_drive_motor -17
-#define front_right_drive_motor 11
-#define middle_right_drive_motor 18
-#define back_right_drive_motor 15
+#define back_left_drive_motor -15
+#define front_right_drive_motor 12
+#define middle_right_drive_motor 17
+#define back_right_drive_motor 16
 #define front_stage_intake_motor 20
-#define hook_stage_intake_motor -5
-#define lady_brown_motor_port 4
+#define hook_stage_intake_motor -8
+#define lady_brown_motor_port 7
 
-#define mogo_mech_port 'G' // make sure digital ports have a set of '' or are of type char
-#define doinker_port 'D'
+#define mogo_mech_port 'D' // make sure digital ports have a set of '' or are of type char
+#define doinker_port 'F'
 #define intake_piston_port 'E'
 
-#define vertical_odom_pod_rotation_sensor 9
-#define lady_brown_pot 'H'
+#define vertical_odom_pod_rotation_sensor 10
+#define lady_brown_pot 'G'
 
-#define imu_port 2
+#define imu_port 11
 
 #define lady_brown_ready_macro 3850
 #define lady_brown_load_macro 15
 #define lady_brown_score_macro 180
 
-#define drivetrain_lateral_p_gain 10.0 //P, I, D. Dont play with these right before match
+#define drivetrain_lateral_p_gain 10.5 //P, I, D. Dont play with these right before match
 #define drivetrain_lateral_i_gain 0.0
 #define drivetrain_lateral_d_gain 70.0
 #define drivetrain_angular_p_gain 2.0
@@ -51,7 +51,7 @@ using namespace pros;
 
 #define throttle_curve_intensity 26
 #define steer_curve_intensity 22
-
+ 
 // quick-guide does not support button combos or multiple controllers by default
 #define doinker_button l2
 #define mogo_button b_button

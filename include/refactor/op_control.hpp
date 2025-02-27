@@ -63,7 +63,7 @@ void misc_task () {
                 pros::delay(10);
             }
         }
-        if (mogo_button_combo.is_pressing()) {
+        if (doinker_button_combo.is_pressing()) {
             doinker_piston.extend();
         } else {
             doinker_piston.retract();
@@ -74,14 +74,26 @@ void misc_task () {
 
 void lady_brown_intake_task () {
     Lady_Brown::position* pose = &hold;
+    lady_brown_motor.set_zero_position(0);
     lady_brown_rotation.calibrate();
     while (1) {
         if (master.get_digital(y_button)) {
             lady_brown_motor.move_velocity(200);
-        } else if (master.get_digital(y_button)) {
+        } else if (master.get_digital(r2)) {
             lady_brown_motor.move_velocity(-200);
-        } else if (master.get_digital(lady_brown_down_button)) {
-        
+        } else if (master.get_digital(a_button)) {
+            double target = 3530.0;
+            double kP = 0.1;
+            double kD = 0.0325;
+            double error = 0;
+            while (1) {
+                double error2 = error;
+                double error = target - lady_brown_rotation.get_value();
+                if (error < 2.5 && error > -2.5) break;
+                double output = kP * error + kD * error - error2;
+                lady_brown_motor.move_velocity(output);
+                pros::delay(10);
+            }
         } else {
             lady_brown_motor.move_velocity(0);
         }

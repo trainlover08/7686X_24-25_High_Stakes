@@ -317,10 +317,10 @@ void awp_red () {
 
 void awp_blue () {
     pros::Task stopper(auto_stopper);
-    chassis.setPose(-55.2, 46.9, 90);
+    chassis.setPose(-55.6, 29.7, 90);
     intake.move_lower();
     mogo_mech_piston.retract();
-    chassis.moveToPose(-23.5, 46.2, 90, 5000, {.minSpeed=1, .earlyExitRange=1}, false);
+    chassis.moveToPoint(-23.5, 46.2, 5000, {.minSpeed=1, .earlyExitRange=1}, false);
     pros::delay(250);
     chassis.turnToPoint(-23, 28, 250, {.forwards=false, .direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE});
     chassis.moveToPose(-23, 28, 0, 1500, {.forwards=false, .minSpeed=1, .earlyExitRange=1}, false);
