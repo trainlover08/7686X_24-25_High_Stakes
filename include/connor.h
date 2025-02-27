@@ -42,6 +42,9 @@ using namespace pros;
 #define lb_return_i_gain .01
 #define lb_return_d_gain 0.75
 
+#define lady_brown_p 1.4 // this is the value you change to control the firmness of the motor
+#define lady_brown_load_position 30 // this is what you change to change the load position of the lb. its in percents of hte rotation sensor
+
 #define drive_width 12.25 // 1. find the middle of the wheel (not the length, the thickness). 2. measure the the distance from the middle of the wheels on both sides.
 #define wheel_diameter 3.25
 #define max_wheel_rpm 450
@@ -57,9 +60,15 @@ using namespace pros;
 #define mogo_button b_button
 #define intake_button r1
 #define extake_button l1
+<<<<<<< HEAD
 #define lady_brown_down_button a_button // change macro for now
 #define lady_brown_que_button y_button
 #define lady_brown_up_button r2 // change macro for now
+=======
+#define lady_brown_load_button r2
+#define lady_brown_up_button a_button
+#define lady_brown_down_button b_button
+>>>>>>> 9ece0edd0a8a581c6aad664c09014cb38b73f87e
 
 // generally don't touch things below this line
 #define l2 E_CONTROLLER_DIGITAL_L2

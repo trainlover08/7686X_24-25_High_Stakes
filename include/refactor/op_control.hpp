@@ -77,6 +77,7 @@ void lady_brown_intake_task () {
     lady_brown_motor.set_zero_position(0);
     lady_brown_rotation.calibrate();
     while (1) {
+<<<<<<< HEAD
         if (master.get_digital(y_button)) {
             lady_brown_motor.move_velocity(200);
         } else if (master.get_digital(r2)) {
@@ -94,6 +95,17 @@ void lady_brown_intake_task () {
                 lady_brown_motor.move_velocity(output);
                 pros::delay(10);
             }
+=======
+        if (master.get_digital(lady_brown_down_button)) {
+            lady_brown_motor.move_velocity(200);
+        } else if (master.get_digital(lady_brown_up_button)) {
+            lady_brown_motor.move_velocity(-200);
+        } else if (master.get_digital(lady_brown_load_button)) {
+            double kP = lady_brown_p;
+            double error = lady_brown_load_position - lady_brown_rotation.get_angle();
+            double velocity = kP * error;
+            lady_brown_motor.move(velocity);
+>>>>>>> 9ece0edd0a8a581c6aad664c09014cb38b73f87e
         } else {
             lady_brown_motor.move_velocity(0);
         }
