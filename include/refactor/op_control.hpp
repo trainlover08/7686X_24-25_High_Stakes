@@ -76,7 +76,7 @@ void lady_brown_intake_task () {
     Lady_Brown::position* pose = &hold;
     lady_brown_rotation.calibrate();
     while (1) {
-        if (master.get_digital(b_button)) {
+        if (master.get_digital(y_button)) {
             lady_brown_motor.move_velocity(200);
         } else if (master.get_digital(y_button)) {
             lady_brown_motor.move_velocity(-200);

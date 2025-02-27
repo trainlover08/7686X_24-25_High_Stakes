@@ -54,11 +54,12 @@ using namespace pros;
 
 // quick-guide does not support button combos or multiple controllers by default
 #define doinker_button l2
-#define mogo_button x_button
+#define mogo_button b_button
 #define intake_button r1
 #define extake_button l1
-#define lady_brown_down_button r2 // change macro for now
+#define lady_brown_down_button a_button // change macro for now
 #define lady_brown_que_button y_button
+#define lady_brown_up_button r2 // change macro for now
 
 // generally don't touch things below this line
 #define l2 E_CONTROLLER_DIGITAL_L2
