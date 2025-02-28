@@ -60,15 +60,10 @@ using namespace pros;
 #define mogo_button b_button
 #define intake_button r1
 #define extake_button l1
-<<<<<<< HEAD
+
 #define lady_brown_down_button a_button // change macro for now
 #define lady_brown_que_button y_button
 #define lady_brown_up_button r2 // change macro for now
-=======
-#define lady_brown_load_button r2
-#define lady_brown_up_button a_button
-#define lady_brown_down_button b_button
->>>>>>> 9ece0edd0a8a581c6aad664c09014cb38b73f87e
 
 // generally don't touch things below this line
 #define l2 E_CONTROLLER_DIGITAL_L2

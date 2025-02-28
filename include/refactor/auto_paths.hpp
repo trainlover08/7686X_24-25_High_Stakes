@@ -304,7 +304,7 @@ void awp_red () {
     pros::delay(500);
     chassis.turnToPoint(-17.3, 34.7, 500, {.forwards=false}, true);
     intake.move();
-    chassis.moveToPose(-24.7, -48.6, -182, 2000, {.minSpeed=1, .earlyExitRange=1}, true);
+    chassis.moveToPose(-24.7, -48.6 - RING, -182, 2000, {.minSpeed=1, .earlyExitRange=1}, true);
     intake.move_lower();
     chassis.moveToPose(-22, -16, 45, 750, {.forwards=false}, true);
     intake.raise_intake(false);
@@ -320,7 +320,7 @@ void awp_blue () {
     chassis.setPose(-55.6, 29.7, 90);
     intake.move_lower();
     mogo_mech_piston.retract();
-    chassis.moveToPoint(-23.5, 46.2, 5000, {.minSpeed=1, .earlyExitRange=1}, false);
+    chassis.moveToPoint(-23.5, 46.2, 5000, {.minSpeed=1, .earlyExitRange=7}, false);
     pros::delay(250);
     chassis.turnToPoint(-23, 28, 250, {.forwards=false, .direction=lemlib::AngularDirection::CCW_COUNTERCLOCKWISE});
     chassis.moveToPose(-23, 28, 0, 1500, {.forwards=false, .minSpeed=1, .earlyExitRange=1}, false);
@@ -351,8 +351,8 @@ void awp_blue () {
     mogo_mech_piston.retract();
     chassis.moveRelative(6, 200);
     chassis.turnToHeading(-290, 500);
-    upper_intake_motor.move_relative(360 * 2.5, 600);
-    chassis.moveToPose(-69.2, 0.75, -270, 1500, {.forwards=false}, false);
+    upper_intake_motor.move_relative(360 * 2.25, 600);
+    chassis.moveToPose(-69.2, 0.0, -270, 1500, {.forwards=false}, false);
     intake.stop_lower();
     intake.move_upper();
     pros::delay(250);
