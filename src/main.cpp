@@ -22,7 +22,6 @@ void competition_initialize () {
 }
 
 void autonomous() {
-    awp_blue();
     auto_ran = 1;
     selector.run_auton();
 }
