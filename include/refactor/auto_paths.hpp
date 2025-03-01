@@ -256,7 +256,6 @@ void auto_stopper () {
 }
 
 void awp_red () {
-    pros::Task stopper(auto_stopper);
     chassis.setPose(-55.2, 46.9, 90);
     intake.move_lower();
     mogo_mech_piston.retract();
@@ -316,7 +315,6 @@ void awp_red () {
 }
 
 void awp_blue () {
-    pros::Task stopper(auto_stopper);
     chassis.setPose(-55.6, 29.7, 90);
     intake.move_lower();
     mogo_mech_piston.retract();

@@ -82,14 +82,14 @@ void lady_brown_intake_task () {
         } else if (master.get_digital(r2)) {
             lady_brown_motor.move_velocity(-200);
         } else if (master.get_digital(a_button)) {
-            double target = 3530.0;
+            double target = 3500.0;
             double kP = 0.1;
             double kD = 0.0325;
             double error = 0;
             while (1) {
                 double error2 = error;
                 double error = target - lady_brown_rotation.get_value();
-                if (error < 2.5 && error > -2.5) break;
+                if (error < 0.5 && error > -0.5) break;
                 double output = kP * error + kD * error - error2;
                 lady_brown_motor.move_velocity(output);
                 pros::delay(10);
