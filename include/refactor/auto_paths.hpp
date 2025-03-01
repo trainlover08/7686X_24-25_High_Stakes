@@ -402,3 +402,27 @@ void goal_rush () {
     intake.stop_lower();
     intake.move_upper();
 }
+
+void skills_2 () {
+    chassis.setPose(-63, 0, 90);
+    intake.move();
+    mogo_mech_piston.retract();
+    pros::delay(1000);
+    chassis.moveRelative(24, 3000);
+    chassis.turnToPoint(-TILE * 2, -TILE, 1000, {.forwards=false});
+    chassis.moveRelative(-24, 3000);
+    pros::delay(500);
+    mogo_mech_piston.extend();
+    pros::delay(500);
+    chassis.moveToPose(-TILE * 2.5, -TILE * 2.5, 45, 5000, {.forwards=false}, false);
+    mogo_mech_piston.retract();
+    pros::delay(500);
+    chassis.moveToPose(-TILE * 2, TILE, 180, 7500, {.forwards=false}, true);
+    pros::delay(500);
+    mogo_mech_piston.extend();
+    pros::delay(500);
+    chassis.moveToPose(-TILE * 2.5, TILE * 2.5, 135, 5000, {.forwards=false}, false);
+    mogo_mech_piston.retract();
+    pros::delay(500);
+    chassis.moveRelative(24, 2000);
+}
