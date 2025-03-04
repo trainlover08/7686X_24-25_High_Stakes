@@ -77,11 +77,11 @@ void lady_brown_intake_task () {
     lady_brown_motor.set_zero_position(0);
     lady_brown_rotation.calibrate();
     while (1) {
-        if (master.get_digital(y_button)) {
+        if (master.get_digital(x_button)) {
             lady_brown_motor.move_velocity(200);
         } else if (master.get_digital(r2)) {
             lady_brown_motor.move_velocity(-200);
-        } else if (master.get_digital(a_button)) {
+        } else if (master.get_digital(a_button) || master.get_digital(y_button)) {
             double target = 3500.0;
             double kP = 0.1;
             double kD = 0.0325;
