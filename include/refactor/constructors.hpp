@@ -25,6 +25,8 @@ pros::adi::Potentiometer lady_brown_rotation(lady_brown_pot);
 
 pros::IMU imu(imu_port);
 
+pros::Optical opt(9);
+
 lemlib::Drivetrain drivetrain(&left_drive, &right_drive, drive_width, wheel_diameter, max_wheel_rpm, 8);
 
 lemlib::TrackingWheel vertical_wheel(&vertical_tracking_wheel, 2, vertical_tracking_offset);
@@ -100,7 +102,7 @@ Mapable_Controller::Button_Combo doinker_button_combo (main_controller.controlle
 Mapable_Controller::Button_Combo lb_down_button (main_controller.controller, {lady_brown_down_button});
 Mapable_Controller::Button_Combo lb_que_button (main_controller.controller, {lady_brown_que_button});
 
-Intake intake(&lower_intake_motor, &upper_intake_motor, &intake_piston);
+Intake intake(&lower_intake_motor, &upper_intake_motor, &intake_piston, &opt);
 Lady_Brown lady_brown(&lady_brown_motor, &lady_brown_rotation, &lady_brown_return_controller);
 Lady_Brown::position hold({.angle=lady_brown_ready_macro, .pid=&lady_brown_return_controller});
 Lady_Brown::position load({.angle=lady_brown_load_macro, .pid=&lady_brown_ready_controller});

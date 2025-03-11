@@ -12,7 +12,7 @@
 class Intake {
 public:
     Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, Color_Sort* lower_sort, pros::Rotation* rotation);
-    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser);
+    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, pros::Optical* opt);
 
     void move();
     void move(bool reverse);
@@ -30,6 +30,8 @@ public:
 
     void raise_intake (bool extend);
 
+    void color_sort (pros::Color color);
+
     std::vector<double> hook_poses {0, 0, 0};
     void move_hook_to_ready();
     void pickup_and_hold();
@@ -42,6 +44,11 @@ public:
     double lb_backup_pose;
 
     double kP, kI, kD = 0.0;
+    bool color_sort_on = 0;
+
+    protected:
+    bool detected;
+    bool last_color_is_red;
     
     private:
     pros::Rotation *rotation;
@@ -68,4 +75,6 @@ public:
     double chain_length = 18.0f;
 
     lemlib::PID* pid;
+
+    pros::Optical* opt;
 };

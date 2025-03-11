@@ -1,6 +1,7 @@
 #include "refactor/intake.hpp"
 #include "pros/adi.hpp"
 #include <cmath>
+#include "connor.h"
 
 Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, Color_Sort* lower_sort, pros::Rotation* rotation) {
      this->lower_intake = lower_intake;
@@ -15,11 +16,13 @@ Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::
      this->pid = new lemlib::PID (this->kP, this->kI, this->kD);
 }
 
-Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser) {
+Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, pros::Optical* opt) {
      this->lower_intake = lower_intake;
      this->upper_intake = upper_intake;
      this->raiser = raiser;
      this->lower_sort = nullptr;
+     this->opt = opt;
+     this->opt->set_led_pwm(100);
 }
 
 double Intake::convert_angle_to_length (double angle) {
@@ -176,4 +179,28 @@ void Intake::sort_ring () {
 
 void Intake::raise_intake (bool extend) {
      this->raiser->set_value(extend);
+}
+
+void Intake::color_sort (pros::Color color) {
+     pros::Color o_col;
+     if (this->opt->get_proximity() > 200) {
+          if (this->opt->get_rgb().red > this->opt->get_rgb().blue) o_col = pros::Color::red; else o_col = pros::Color::blue;
+          if (o_col == color) {
+               this->upper_intake->move_velocity(200);
+               while (this->opt->get_proximity() > 50) {
+                    this->upper_intake->move_velocity(200);
+                    pros::delay(10);
+               }
+               this->upper_intake->tare_position();
+               while (this->upper_intake->get_position() < SORT_MACRO) {
+                    this->upper_intake->move_velocity(600);
+                    pros::delay(10);
+               }
+               this->upper_intake->move_velocity(0);
+               while (this->upper_intake->get_actual_velocity() > 1) {
+                    pros::delay(50);
+               }
+               return;
+          }
+     }
 }
