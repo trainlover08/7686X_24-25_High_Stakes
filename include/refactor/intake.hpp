@@ -7,12 +7,13 @@
 #include "pros/adi.hpp"
 #include "color_sort.hpp"
 #include "lemlib/pid.hpp"
+#include "pros/adi.hpp"
 #include <vector>
 
 class Intake {
 public:
     Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, Color_Sort* lower_sort, pros::Rotation* rotation);
-    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, pros::Optical* opt);
+    Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, pros::Optical* opt, pros::Distance* dist);
 
     void move();
     void move(bool reverse);
@@ -77,4 +78,7 @@ public:
     lemlib::PID* pid;
 
     pros::Optical* opt;
+    pros::Distance* dist;
+
+    pros::Controller* master;
 };

@@ -16,13 +16,16 @@ Intake::Intake(pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::
      this->pid = new lemlib::PID (this->kP, this->kI, this->kD);
 }
 
-Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, pros::Optical* opt) {
+Intake::Intake (pros::Motor* lower_intake, pros::Motor* upper_intake, pros::adi::Pneumatics* raiser, pros::Optical* opt, pros::Distance* dist) {
      this->lower_intake = lower_intake;
      this->upper_intake = upper_intake;
      this->raiser = raiser;
      this->lower_sort = nullptr;
      this->opt = opt;
      this->opt->set_led_pwm(100);
+     pros::Controller master(pros::E_CONTROLLER_MASTER);
+     this->master = &master;
+     this->dist = dist;
 }
 
 double Intake::convert_angle_to_length (double angle) {
@@ -186,19 +189,40 @@ void Intake::color_sort (pros::Color color) {
      if (this->opt->get_proximity() > 200) {
           if (this->opt->get_rgb().red > this->opt->get_rgb().blue) o_col = pros::Color::red; else o_col = pros::Color::blue;
           if (o_col == color) {
-               this->upper_intake->move_velocity(200);
-               while (this->opt->get_proximity() > 50) {
-                    this->upper_intake->move_velocity(200);
-                    pros::delay(10);
-               }
-               this->upper_intake->tare_position();
-               while (this->upper_intake->get_position() < SORT_MACRO) {
+               this->upper_intake->move_velocity(600);
+               int count = 0;
+               while (this->dist->get_distance() > SENSE_DIST) {
                     this->upper_intake->move_velocity(600);
                     pros::delay(10);
+                    count++;
+                    if (count > 1000) break;
+                    //if (master->get_digital(l1)) return;
+               }
+               this->upper_intake->move_velocity(600);
+               count = 0;
+               while (this->dist->get_distance() < SENSE_DIST) {
+                    this->upper_intake->move_velocity(600);
+                    pros::delay(10);
+                    count++;
+                    if (count > 1000) break;
+               }
+               this->upper_intake->move_velocity(600);
+               this->upper_intake->tare_position();
+               count = 0;
+               while (this->upper_intake->get_position() < SORT_MACRO) {
+                    count++;
+                    this->upper_intake->move_velocity(600);
+                    pros::delay(10);
+                    if (count > 1000) break;
+                    //if (master->get_digital(l1)) return;
                }
                this->upper_intake->move_velocity(0);
+               count = 0;
                while (this->upper_intake->get_actual_velocity() > 1) {
                     pros::delay(50);
+                    count++;
+                    if (count > 1000) break;
+                    //if (master->get_digital(l1)) return;
                }
                return;
           }

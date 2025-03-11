@@ -11,10 +11,9 @@ bool mut = 1;
 void intake_task () {
     while (1) {
         if (mut) {
-            //if (intake_button_combo.is_pressing()) {
-            if (1) {
+            if (intake_button_combo.is_pressing()) {
                 intake.move();
-                intake.color_sort(pros::Color::red);
+                intake.color_sort(pros::Color::blue);
             } else if (extake_button_combo.is_pressing()) {
                 intake.move(true);
             } else {
@@ -27,20 +26,8 @@ void intake_task () {
 
 void ui_task () {
     while (1) {
-        std::string x_str = "X: " + std::to_string(chassis.getPose().x);
-        std::string y_str = "Y: " + std::to_string(chassis.getPose().y);
-        std::string t_str = "Theta: " + std::to_string(chassis.getPose().theta);
-        std::string dist = "Distance: " + std::to_string(opt.get_proximity());
-        std::string rbg = "R: " + std::to_string(opt.get_rgb().red) + "B: " + std::to_string(opt.get_rgb().blue);
-        std::string ring_str = opt.get_proximity() > 140 ? opt.get_rgb().red > opt.get_rgb().blue ? "Red" : "Blue": "Null";
-        ring_str = "Ring: " + ring_str;
         console.clear();
-        //console.println(x_str);
-        //console.println(y_str);
-        //console.println(t_str);
-        console.println(dist);
-        console.println(rbg);
-        console.println(ring_str);
+        console.println("R" + std::to_string(opt.get_rgb().red) + " b" + std::to_string(opt.get_rgb().blue));
         pros::delay(50);
     }
 }

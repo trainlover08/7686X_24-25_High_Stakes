@@ -55,7 +55,8 @@ using namespace pros;
 #define throttle_curve_intensity 26
 #define steer_curve_intensity 22
 
-#define SORT_MACRO 330
+#define SORT_MACRO 10
+#define SENSE_DIST 100
  
 // quick-guide does not support button combos or multiple controllers by default
 #define doinker_button l2
