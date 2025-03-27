@@ -47,6 +47,8 @@ public:
     double kP, kI, kD = 0.0;
     bool color_sort_on = 0;
 
+    void anti_jam ();
+
     protected:
     bool detected;
     bool last_color_is_red;

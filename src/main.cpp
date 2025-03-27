@@ -22,6 +22,7 @@ void competition_initialize () {
 }
 
 void autonomous() {
+    exp_rr();
     auto_ran = 1;
     selector.run_auton();
 }
@@ -41,11 +42,21 @@ void opcontrol () {
             pre_match_blue_left_elims();
         }
     }*/
+
+    //really_new_pos_rush();
+    //neg_clear_blue();
+    //exp_rr();
+    //red_pos_rush_base();
+    //chassis.setPose(0, 0, 90);
     
     pros::Task intake_task_opcontrol (intake_task);
+    pros::delay(10);
     pros::Task drivetrain_task_opcontrol (drive_task);
+    pros::delay(10);
     pros::Task ui_task_opcontrol (ui_task);
+    pros::delay(10);
     pros::Task misc_task_opcontrol (misc_task);
+    pros::delay(10);
     pros::Task lady_brown_intake_task_opcontrol (lady_brown_intake_task);
     
     //pros::Task mcl_task (localize);

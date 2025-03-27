@@ -28,9 +28,9 @@ pros::IMU imu(imu_port);
 pros::Optical opt(9);
 pros::Distance dist(19);
 
-lemlib::Drivetrain drivetrain(&left_drive, &right_drive, drive_width, wheel_diameter, max_wheel_rpm, 8);
+lemlib::Drivetrain drivetrain(&left_drive, &right_drive, drive_width, lemlib::Omniwheel::NEW_325, max_wheel_rpm, 8);
 
-lemlib::TrackingWheel vertical_wheel(&vertical_tracking_wheel, 2, vertical_tracking_offset);
+lemlib::TrackingWheel vertical_wheel(&vertical_tracking_wheel, 1.845, vertical_tracking_offset);
 
 lemlib::OdomSensors sensors(&vertical_wheel, nullptr, nullptr, nullptr, &imu);
 

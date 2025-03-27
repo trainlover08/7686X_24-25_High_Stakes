@@ -27,11 +27,11 @@ using namespace pros;
 #define lady_brown_score_macro 180
 
 #define drivetrain_lateral_p_gain 10.5 //P, I, D. Dont play with these right before match
-#define drivetrain_lateral_i_gain 0.0
-#define drivetrain_lateral_d_gain 70.0
+#define drivetrain_lateral_i_gain 0.01
+#define drivetrain_lateral_d_gain 75.0
 #define drivetrain_angular_p_gain 2.0
 #define drivetrain_angular_i_gain 0.1
-#define drivetrain_angular_d_gain 28.0
+#define drivetrain_angular_d_gain 36.0
 #define lb_ready_p_gain 0.00 //P, I, D for the lady brown controller
 #define lb_ready_i_gain 0.0
 #define lb_ready_d_gain 0.100

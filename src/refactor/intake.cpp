@@ -204,7 +204,7 @@ void Intake::color_sort (pros::Color color) {
                     this->upper_intake->move_velocity(600);
                     pros::delay(10);
                     count++;
-                    if (count > 1000) break;
+                    if (count > 500) break;
                }
                this->upper_intake->move_velocity(600);
                this->upper_intake->tare_position();
@@ -213,7 +213,7 @@ void Intake::color_sort (pros::Color color) {
                     count++;
                     this->upper_intake->move_velocity(600);
                     pros::delay(10);
-                    if (count > 1000) break;
+                    if (count > 500) break;
                     //if (master->get_digital(l1)) return;
                }
                this->upper_intake->move_velocity(0);
@@ -221,10 +221,28 @@ void Intake::color_sort (pros::Color color) {
                while (this->upper_intake->get_actual_velocity() > 1) {
                     pros::delay(50);
                     count++;
-                    if (count > 1000) break;
+                    if (count > 500) break;
                     //if (master->get_digital(l1)) return;
                }
                return;
           }
+     }
+}
+
+void Intake::anti_jam () {
+     double v1, v2 = 0.0;
+     pros::Mutex m;
+     while (1) {
+          v1 = v2;
+          m.take();
+          v2 = this->upper_intake->get_actual_velocity();
+          m.give();
+          if (1) {
+               m.take();
+               this->move_upper(-100);
+               pros::delay(900);
+               m.give();
+          }
+          pros::delay(10);
      }
 }
