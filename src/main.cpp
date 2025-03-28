@@ -10,7 +10,9 @@ void initialize() {
     chassis.setPose(0, 0, 0);
     selector.focus();
     chassis.calibrate();
-    lady_brown_rotation.calibrate(); 
+    lady_brown_rotation.calibrate();
+    auto name = selector.get_auton()->name;
+    if (name == "Red Negative Elims" || name == "Red Negative AWP" || name == "Red Positive Wallstake" || name == "Red Positive Sweep" || name == "Red Positive AWP") GLOBAL_COLOR = pros::Color::blue; else GLOBAL_COLOR = pros::Color::red;
 }
 
 void disabled () {
@@ -22,7 +24,9 @@ void competition_initialize () {
 }
 
 void autonomous() {
-    exp_rr();
+    auto name = selector.get_auton()->name;
+    if (name == "Red Negative Elims" || name == "Red Negative AWP" || name == "Red Positive Wallstake" || name == "Red Positive Sweep" || name == "Red Positive AWP") GLOBAL_COLOR = pros::Color::red; else GLOBAL_COLOR = pros::Color::blue;
+    upper_intake_motor.move_relative(-120, 600);
     auto_ran = 1;
     selector.run_auton();
 }

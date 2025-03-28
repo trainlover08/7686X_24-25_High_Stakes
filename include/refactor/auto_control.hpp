@@ -3,7 +3,7 @@
 #include "auto_paths.hpp"
 #include "pros/misc.h"
 
-rd::Selector selector({{"Red Goal Rush", goal_rush, "/usd/images/red_right_elim.bin"}, {"Blue AWP", awp_blue, "/usd/images/blue_left_awp.bin"}, {"Red AWP", awp_red, "/usd/images/red_left_awp.bin"}, {"Skills", skills_2, "/usd/images/skills.bin"}, {"No End Red No AWP", special_red}});
+rd::Selector selector({{"Red Negative Elims", red_neg_sweep, "/usd/images/red_left_elim.bin"}, {"Red Negative AWP", red_neg_awp, "/usd/images/red_left_awp.bin"}, {"Blue Negative Elims", blue_neg_sweep, "/usd/images/blue_left_elim.bin"}, {"Blue Negative AWP", blue_neg_awp, "/usd/images/blue_right_awp.bin"}, {"Blue Positive Sweep", blue_pos_sweep, "/usd/images/blue_left_elim.bin"}, {"Blue Positive AWP", blue_pos_awp, "/usd/images/blue_left_awp.bin"}, {"Blue Positive Wallstake", blue_pos_cover, "/usd/images/blue_left_elim.bin"}});
 
 void cancel_auto_motion () {
     while (1) {

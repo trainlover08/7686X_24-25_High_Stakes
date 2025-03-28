@@ -9,19 +9,19 @@
 bool mut = 1;
 
 void intake_task () {
-    double v1, v2 = 0.0;
-     pros::Mutex m;
-     while (1) {
-        v1 = v2;
+    //double v1, v2 = 0.0;
+    pros::Mutex m;
+    while (1) {
+        /*v1 = v2;
         v2 = upper_intake_motor.get_actual_velocity();
         if (v2 - v1 < -1.0 && v2 < 5.0) {
             //intake.move_upper(-100);
             pros::delay(90);
-        }
+        }*/
         if (mut) {
             if (intake_button_combo.is_pressing()) {
                 intake.move();
-                intake.color_sort(pros::Color::red);
+                intake.color_sort(GLOBAL_COLOR);
             } else if (extake_button_combo.is_pressing()) {
                 intake.move(true);
             } else {

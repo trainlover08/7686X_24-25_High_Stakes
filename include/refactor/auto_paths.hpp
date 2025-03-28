@@ -590,7 +590,7 @@ void goal_rush_four_ring () {
 
 ASSET(rednegringrush_txt);
 
-void exp_rr () {
+void red_neg_sweep () {
     /*chassis.setPose(-60.4, 37.7, 156.6);
     doinker_piston.extend();
     pros::Task lb(lb_auto_task);
@@ -711,11 +711,11 @@ void exp_rr () {
     //lb.remove();
 }
 
-void neg_awp () {
+void red_neg_awp () {
     chassis.setPose(0, 0, 180);
     mogo_mech_piston.retract();
     intake.move_lower(-100);
-    chassis.moveToPose(-6.5, -11.8, 117.5, 1500, {}, false);
+    chassis.moveToPose(-6.5, -12.8, 117.5, 1500, {}, false);
     lady_brown_motor.move_velocity(-200);
     pros::delay(500);
     chassis.moveToPoint(22.8, 6.9, 600, {.forwards=false, .minSpeed=1, .earlyExitRange=.5}, false);
@@ -750,11 +750,11 @@ void neg_awp () {
     pros::delay(5000);
 }
 
-void neg_awp_blue () {
+void blue_neg_awp () {
     chassis.setPose(0, 0, 180);
     mogo_mech_piston.retract();
     intake.move_lower(-100);
-    chassis.moveToPose(-6.5, -11.8, 117.5, 1500, {}, false);
+    chassis.moveToPose(-6.5, -12.8, 117.5, 1500, {}, false);
     lady_brown_motor.move_velocity(-200);
     pros::delay(500);
     chassis.moveToPoint(-22.8, 6.9, 600, {.forwards=false, .minSpeed=1, .earlyExitRange=.5}, false);
@@ -789,7 +789,7 @@ void neg_awp_blue () {
     pros::delay(5000);
 }
 
-void neg_clear_blue () {
+void blue_neg_sweep () {
     chassis.setPose(0, 0, 180);
     mogo_mech_piston.retract();
     intake.move_lower(-100);
@@ -862,7 +862,7 @@ void really_new_pos_base () {
     
 }
 
-void really_new_pos_awp () {
+void blue_pos_awp () {
     chassis.setPose(0, 0, 270);
     mogo_mech_piston.retract();
     intake.move_lower();
@@ -902,7 +902,7 @@ void really_new_pos_awp () {
     lady_brown_motor.move_velocity(200);
 }
 
-void really_new_pos_clear () {
+void blue_pos_sweep () {
     chassis.setPose(0, 0, 270);
     mogo_mech_piston.retract();
     intake.move_lower();
@@ -943,7 +943,7 @@ void really_new_pos_clear () {
     chassis.turnToHeading(315, 500, {}, false);
 }
 
-void really_new_pos_rush () {
+void blue_pos_cover () {
     chassis.setPose(0, 0, 270);
     mogo_mech_piston.retract();
     intake.move_lower();
@@ -987,4 +987,20 @@ void red_pos_rush_base () {
     chassis.turnToHeading(75, 150);
     chassis.moveToPoint(38.5, 13.2, 5000, {.minSpeed=1, .earlyExitRange=.5}, false);
     doinker_piston.extend();
+}
+
+void fuck_this () {
+    chassis.setPose(0, 0, 0);
+    chassis.setPose(0, 0, 180);
+    mogo_mech_piston.retract();
+    intake.move_lower(-100);
+    chassis.moveToPose(-6.5, -12.8, 117.5, 1500, {}, false);
+    lady_brown_motor.move_velocity(-200);
+    pros::delay(500);
+    chassis.moveToPoint(22.8, 6.9, 600, {.forwards=false, .minSpeed=1, .earlyExitRange=.5}, false);
+    chassis.moveToPoint(22.8, 5.1, 1500, {.forwards=false, .maxSpeed=31, .minSpeed=1, .earlyExitRange=.5}, false);
+    pros::delay(250);
+    mogo_mech_piston.extend();
+    pros::Task sort(auto_sort_task);
+    pros::delay(250);
 }

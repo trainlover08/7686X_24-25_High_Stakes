@@ -110,3 +110,5 @@ Lady_Brown::position load({.angle=lady_brown_load_macro, .pid=&lady_brown_ready_
 Lady_Brown::position score({.angle=lady_brown_score_macro, .pid=&lady_brown_score_controller});
 
 lemlib::Pose chassis_pose = chassis.getPose();
+
+pros::Color GLOBAL_COLOR;
